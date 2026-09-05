@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Agendar cita - NutriVida</title>
+
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+
+    <header>
+        <h1>Clínica Nutricional NutriVida</h1>
+        <p>Asesoría nutricional personalizada</p>
+    </header>
+
+    <nav>
+        <a href="index.html">Inicio</a>
+        <a href="servicios.html">Servicios</a>
+        <a href="agendar.html">Agendar cita</a>
+        <a href="contacto.html">Contacto</a>
+    </nav>
+
+    <main>
+
+        <section>
+
+            <h2>Agendar una cita</h2>
+
+            <p>
+                Completa el siguiente formulario para solicitar una hora
+                con uno de nuestros nutricionistas.
+            </p>
+
+            <form id="formAgendar" novalidate>
+
+                <!-- Nombre -->
+                <label for="nombre">Nombre completo:</label>
+                <input type="text"
+                       id="nombre"
+                       name="nombre"
+                       placeholder="Ej: Juan Pérez"
+                       autocomplete="name">
+
+                <p id="errorNombre" class="error"></p>
+
+
+                <!-- Correo -->
+                <label for="correo">Correo electrónico:</label>
+                <input type="email"
+                       id="correo"
+                       name="correo"
+                       placeholder="Ej: correo@gmail.com"
+                       autocomplete="email">
+
+                <p id="errorCorreo" class="error"></p>
+                <p id="mensajeCorreo" class="correcto"></p>
+
+
+                <!-- Teléfono -->
+                <label for="telefono">Teléfono:</label>
+                <input type="tel"
+                       id="telefono"
+                       name="telefono"
+                       placeholder="Ej: 912345678"
+                       autocomplete="tel">
+
+                <p id="errorTelefono" class="error"></p>
+                <p id="mensajeTelefono" class="correcto"></p>
+
+
+                <!-- Nutricionista -->
+                <label for="nutricionista">Nutricionista:</label>
+
+                <select id="nutricionista" name="nutricionista">
+                    <option value="">Seleccione una opción</option>
+                    <option value="nutricionista1">Nutricionista 1</option>
+                    <option value="nutricionista2">Nutricionista 2</option>
+                    <option value="nutricionista3">Nutricionista 3</option>
+                    <option value="nutricionista4">Nutricionista 4</option>
+                </select>
+
+                <p id="errorNutricionista" class="error"></p>
+                <p id="mensajeNutricionista" class="correcto"></p>
+
+
+                <!-- Fecha -->
+                <label for="fecha">Fecha de la cita:</label>
+                <input type="date" id="fecha" name="fecha">
+
+                <p id="errorFecha" class="error"></p>
+                <p id="mensajeFecha" class="correcto"></p>
+
+
+                <!-- Hora -->
+                <label for="hora">Hora:</label>
+                <input type="time" id="hora" name="hora">
+
+                <p id="errorHora" class="error"></p>
+                <p id="mensajeHora" class="correcto"></p>
+
+
+                <!-- Motivo -->
+                <label for="motivo">Motivo de la consulta:</label>
+
+                <textarea
+                    id="motivo"
+                    name="motivo"
+                    rows="4"
+                    placeholder="Explique brevemente el motivo de su consulta"></textarea>
+
+                <p id="errorMotivo" class="error"></p>
+                <p id="mensajeMotivo" class="correcto"></p>
+
+
+                <!-- Mensaje final -->
+                <p id="mensajeFinal" class="correcto"></p>
+
+
+                <button type="submit">Agendar cita</button>
+
+            </form>
+
+        </section>
+
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Clínica Nutricional NutriVida</p>
+        <p>Temuco, Región de La Araucanía</p>
+    </footer>
+
+    <script src="js/validaciones.js"></script>
+
+</body>
+
+</html>
