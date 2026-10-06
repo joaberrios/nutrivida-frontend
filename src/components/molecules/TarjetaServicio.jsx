@@ -1,9 +1,16 @@
+import { useNavigate } from 'react-router-dom'
 import Card from 'react-bootstrap/Card'
 import Precio from '../atoms/Precio'
 import EtiquetaModalidad from '../atoms/EtiquetaModalidad'
 import Boton from '../atoms/Boton'
 
 function TarjetaServicio(props) {
+  const navigate = useNavigate()
+
+  function verDetalle() {
+    navigate(`/catalogo/${props.codigo}`)
+  }
+
   return (
     <Card className="h-100 shadow-sm">
       <Card.Body>
@@ -32,7 +39,10 @@ function TarjetaServicio(props) {
 
         <Precio valor={props.precio} />
 
-        <Boton texto="Ver servicio" />
+        <Boton
+          texto="Ver servicio"
+          alHacerClick={verDetalle}
+        />
       </Card.Body>
     </Card>
   )

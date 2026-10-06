@@ -21,6 +21,10 @@ function Navbar() {
               Servicios y planes
             </Nav.Link>
 
+            <Nav.Link as={Link} to="/categorias">
+              Categorías
+            </Nav.Link>
+
             <Nav.Link as={Link} to="/login">
               Iniciar sesión
             </Nav.Link>

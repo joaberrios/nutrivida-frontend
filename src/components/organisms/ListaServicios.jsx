@@ -25,6 +25,7 @@ function ListaServicios() {
         {serviciosFiltrados.map((servicio) => (
           <Col key={servicio.codigo} xs={12} md={6} lg={4}>
             <TarjetaServicio
+              codigo={servicio.codigo}
               nombre={servicio.nombre}
               tipo={servicio.tipo}
               descripcion={servicio.descripcion}
