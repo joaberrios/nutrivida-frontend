@@ -1,69 +1,54 @@
-# Warning [![npm version](https://badge.fury.io/js/warning.svg)](https://badge.fury.io/js/warning)
+# NutriVida
 
-[![Greenkeeper badge](https://badges.greenkeeper.io/BerkeleyTrue/warning.svg)](https://greenkeeper.io/)
-A mirror of Facebook's [Warning](https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js)
+Proyecto desarrollado con React para la Clínica NutriVida.
 
+El sistema permite visualizar servicios y planes nutricionales, buscar servicios, revisar categorías y consultar el detalle de cada servicio.
 
-## Usage
-```
-npm install warning
-```
+## Tecnologías utilizadas
 
-```
-// some script
-var warning = require('warning');
+- React
+- Vite
+- Bootstrap
+- React Bootstrap
+- React Router DOM
+- Vitest
+- Testing Library
 
-var ShouldBeTrue = false;
+## Instalación
 
-warning(
-  ShouldBeTrue,
-  'This thing should be true but you set to false. No soup for you!'
-);
-//  'This thing should be true but you set to false. No soup for you!'
-```
+Clonar el repositorio y entrar a la carpeta del proyecto.
 
-Similar to Facebook's (FB) invariant but only logs a warning if the condition is not met.
-This can be used to log issues in development environments in critical
-paths. Removing the logging code for production environments will keep the
-same logic and follow the same code paths.
+Instalar las dependencias:
 
-## FAQ (READ before opening an issue)
+npm install
 
-> Why do you use `console.error` instead of `console.warn` ?
+## Ejecutar el proyecto
 
-This is a mirror of Facebook's (FB) [warning](https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js) module used within React's source code (and other FB software).
-As such this module will mirror their code as much as possible. 
+Para iniciar el proyecto:
 
-The descision to use `error` over `warn` was made a long time ago by the FB team and isn't going to change anytime soon.
+npm run dev
 
-The source can be found here: https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js
-The reasoning can be found here and elsewhere: https://github.com/facebook/fbjs/pull/94#issuecomment-168332326
+Luego abrir la dirección que muestra Vite en la terminal, normalmente:
 
-> Can I add X feature?
+http://localhost:5173/
 
-This is a mirror of Facebook's (FB) [warning](https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js) and as such the source and signature will mirror that module.
+## Ejecutar las pruebas
 
-If you believe a feature is missing than please open a feature request [there](https://github.com/facebook/fbjs).
-If it is approved and merged in that this module will be updated to reflect that change, otherwise this module will not change.
+Para ejecutar las pruebas:
 
-## Use in Production
+npx vitest run
 
-It is recommended to add [babel-plugin-dev-expression](https://github.com/4Catalyzer/babel-plugin-dev-expression) with this module to remove warning messages in production.
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
-<small>Don't Forget To Be Awesome</small>
+Actualmente el proyecto cuenta con 5 pruebas unitarias.
+
+## Cobertura de pruebas
+
+Para generar el informe de cobertura:
+
+npx vitest run --coverage
+
+El primer informe generado obtuvo aproximadamente un 60% de cobertura total.
+
+## Integrantes
+
+- Joaquín
+- Dastin
