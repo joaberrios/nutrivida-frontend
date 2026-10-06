@@ -25,6 +25,10 @@ function Navbar() {
               Categorías
             </Nav.Link>
 
+           <Nav.Link as={Link} to="/nueva-cita">
+              Agendar cita
+            </Nav.Link>
+            
             <Nav.Link as={Link} to="/login">
               Iniciar sesión
             </Nav.Link>
