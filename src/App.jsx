@@ -1,7 +1,7 @@
-
 import { Routes, Route, Navigate } from 'react-router-dom'
 
 import Login from './pages/Login'
+import Registro from './pages/Registro'
 import Inicio from './pages/Inicio'
 import MenuPrincipal from './pages/MenuPrincipal'
 import Servicios from './pages/Servicios'
@@ -19,6 +19,8 @@ function App() {
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       <Route path="/login" element={<Login />} />
+      <Route path="/registro" element={<Registro />} />
+
       <Route path="/inicio" element={<Inicio />} />
       <Route path="/menu" element={<MenuPrincipal />} />
 
