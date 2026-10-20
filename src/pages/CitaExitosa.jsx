@@ -1,9 +1,12 @@
+
 import { Container, Card, Button } from 'react-bootstrap'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 
 function CitaExitosa() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const cita = location.state?.cita
 
   return (
     <PlantillaPublica>
@@ -13,17 +16,26 @@ function CitaExitosa() {
           style={{ maxWidth: '600px' }}
         >
           <Card.Body>
-            <h1 className="text-success mb-3">
-              ¡Cita agendada!
-            </h1>
+            {cita ? (
+              <>
+                <h1 className="text-success mb-3">
+                  ¡Cita agendada!
+                </h1>
 
-            <p>
-              Tu cita fue registrada correctamente.
-            </p>
+                <p>Tu cita fue registrada correctamente.</p>
 
-            <p>
-              Recibirás la atención en la fecha y hora seleccionadas.
-            </p>
+                <p><strong>Servicio:</strong> {cita.servicio}</p>
+                <p><strong>Nutricionista:</strong> {cita.nutricionista}</p>
+                <p><strong>Fecha:</strong> {cita.fecha}</p>
+                <p><strong>Hora:</strong> {cita.hora}</p>
+                <p><strong>Estado:</strong> {cita.estado}</p>
+              </>
+            ) : (
+              <>
+                <h2>No hay una confirmación disponible</h2>
+                <p>Realiza una reserva para obtener su confirmación.</p>
+              </>
+            )}
 
             <Button
               variant="success"

@@ -1,12 +1,32 @@
+
 import { Container, Card, Button } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
+import { guardarCita } from '../services/citasService'
 
 function ConfirmarCita() {
   const location = useLocation()
   const navigate = useNavigate()
 
   const datos = location.state
+
+  function confirmarReserva() {
+    try {
+      const citaGuardada = guardarCita(datos)
+
+      navigate('/cita-exitosa', {
+        replace: true,
+        state: { cita: citaGuardada }
+      })
+    } catch (error) {
+      navigate('/cita-error', {
+        replace: true,
+        state: {
+          mensaje: error.message
+        }
+      })
+    }
+  }
 
   if (!datos) {
     return (
@@ -32,7 +52,10 @@ function ConfirmarCita() {
           Confirmar cita
         </h1>
 
-        <Card className="mx-auto shadow-sm" style={{ maxWidth: '600px' }}>
+        <Card
+          className="mx-auto shadow-sm"
+          style={{ maxWidth: '600px' }}
+        >
           <Card.Body>
             <Card.Title>Resumen de la cita</Card.Title>
 
@@ -53,10 +76,11 @@ function ConfirmarCita() {
             </p>
 
             <Button
-            variant="success"
-             className="me-2"
-             onClick={() => navigate('/cita-exitosa')}>
-            Confirmar cita
+              variant="success"
+              className="me-2"
+              onClick={confirmarReserva}
+            >
+              Confirmar cita
             </Button>
 
             <Button

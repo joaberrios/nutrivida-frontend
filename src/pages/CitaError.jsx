@@ -1,9 +1,15 @@
+
 import { Container, Card, Button } from 'react-bootstrap'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 
 function CitaError() {
   const navigate = useNavigate()
+  const location = useLocation()
+
+  const mensaje =
+    location.state?.mensaje ||
+    'Ocurrió un problema al registrar la cita.'
 
   return (
     <PlantillaPublica>
@@ -17,12 +23,11 @@ function CitaError() {
               No se pudo agendar la cita
             </h1>
 
-            <p>
-              Ocurrió un problema al registrar la cita.
-            </p>
+            <p>{mensaje}</p>
 
             <p>
-              Puedes volver a intentarlo seleccionando nuevamente los datos.
+              Puedes volver a intentarlo seleccionando
+              nuevamente los datos.
             </p>
 
             <Button
