@@ -159,8 +159,32 @@ function AdminServicios() {
 
       <h3 className="mb-3">Servicios registrados</h3>
 
-      <div className="table-responsive">
-        <Table striped bordered hover>
+      <p className="text-muted small d-md-none">
+        Desliza la tabla hacia los lados para ver todas las columnas y los botones.
+      </p>
+
+      <div
+        className="w-100"
+        role="region"
+        aria-label="Tabla de servicios registrados"
+        tabIndex={0}
+        style={{
+          maxWidth: '100%',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
+          borderRadius: '8px',
+          border: '1px solid #dee2e6'
+        }}
+      >
+        <Table
+          striped
+          bordered
+          hover
+          className="mb-0"
+          style={{
+            minWidth: '750px'
+          }}
+        >
           <thead>
             <tr>
               <th>Código</th>
@@ -181,23 +205,23 @@ function AdminServicios() {
                   ${Number(servicio.precio).toLocaleString('es-CL')}
                 </td>
                 <td>
-                  <Button
-                    variant="warning"
-                    size="sm"
-                    className="me-2 mb-1"
-                    onClick={() => seleccionarEditar(servicio)}
-                  >
-                    Editar
-                  </Button>
+                  <div className="d-flex gap-2">
+                    <Button
+                      variant="warning"
+                      size="sm"
+                      onClick={() => seleccionarEditar(servicio)}
+                    >
+                      Editar
+                    </Button>
 
-                  <Button
-                    variant="danger"
-                    size="sm"
-                    className="mb-1"
-                    onClick={() => eliminar(servicio.codigo)}
-                  >
-                    Eliminar
-                  </Button>
+                    <Button
+                      variant="danger"
+                      size="sm"
+                      onClick={() => eliminar(servicio.codigo)}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
                 </td>
               </tr>
             ))}
