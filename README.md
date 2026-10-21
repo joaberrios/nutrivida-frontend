@@ -1,154 +1,69 @@
-# NutriVida
+# Warning [![npm version](https://badge.fury.io/js/warning.svg)](https://badge.fury.io/js/warning)
 
-NutriVida es una aplicación web desarrollada con React para la gestión de servicios nutricionales y el agendamiento de citas.
+[![Greenkeeper badge](https://badges.greenkeeper.io/BerkeleyTrue/warning.svg)](https://greenkeeper.io/)
+A mirror of Facebook's [Warning](https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js)
 
-El proyecto permite consultar servicios, revisar categorías, registrar usuarios, iniciar sesión, agendar citas y administrar los servicios disponibles.
 
-## Tecnologías utilizadas
-
-- React
-- Vite
-- JavaScript
-- Bootstrap
-- React Bootstrap
-- React Router DOM
-- Context API
-- Vitest
-- React Testing Library
-- Git y GitHub
-
-## Funcionalidades principales
-
-### Inicio de sesión y registro
-
-El sistema permite iniciar sesión con cuentas existentes y registrar nuevos usuarios.
-
-Los formularios incluyen validaciones para comprobar los datos ingresados y mostrar mensajes cuando existe algún error.
-
-### Catálogo de servicios
-
-Los usuarios pueden consultar los servicios nutricionales disponibles, buscar servicios, revisar categorías y acceder al detalle de cada servicio.
-
-### Agendamiento de citas
-
-El sistema permite seleccionar un servicio, nutricionista, fecha y horario.
-
-Antes de confirmar la reserva, se muestra un resumen con los datos seleccionados.
-
-El sistema también contempla una página de confirmación exitosa y otra para informar errores durante el agendamiento.
-
-### Administración de servicios
-
-El módulo de administración permite:
-
-- Agregar nuevos servicios.
-- Consultar los servicios registrados.
-- Editar servicios existentes.
-- Eliminar servicios.
-- Validar campos obligatorios, precios y códigos duplicados.
-
-### Almacenamiento de datos
-
-El proyecto utiliza `localStorage` para guardar información de usuarios registrados, servicios y citas en el navegador.
-
-Este almacenamiento corresponde a una implementación académica y no reemplaza una base de datos ni un sistema de autenticación seguro para producción.
-
-## Arquitectura del proyecto
-
-El proyecto utiliza una organización basada en Atomic Design:
-
-- **Atoms:** componentes básicos reutilizables.
-- **Molecules:** combinaciones de componentes pequeños.
-- **Organisms:** componentes de mayor complejidad.
-- **Templates:** estructuras reutilizables de páginas.
-- **Pages:** páginas principales de la aplicación.
-
-Además, incluye carpetas para servicios, contexto y datos.
-
-## Instalación
-
-Clonar el repositorio:
-
-```bash
-git clone https://github.com/joaberrios/nutrivida-frontend.git
+## Usage
+```
+npm install warning
 ```
 
-Ingresar a la carpeta:
+```
+// some script
+var warning = require('warning');
 
-```bash
-cd nutrivida-frontend
+var ShouldBeTrue = false;
+
+warning(
+  ShouldBeTrue,
+  'This thing should be true but you set to false. No soup for you!'
+);
+//  'This thing should be true but you set to false. No soup for you!'
 ```
 
-Instalar las dependencias:
+Similar to Facebook's (FB) invariant but only logs a warning if the condition is not met.
+This can be used to log issues in development environments in critical
+paths. Removing the logging code for production environments will keep the
+same logic and follow the same code paths.
 
-```bash
-npm install
-```
+## FAQ (READ before opening an issue)
 
-## Ejecutar el proyecto
+> Why do you use `console.error` instead of `console.warn` ?
 
-Iniciar el servidor de desarrollo:
+This is a mirror of Facebook's (FB) [warning](https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js) module used within React's source code (and other FB software).
+As such this module will mirror their code as much as possible. 
 
-```bash
-npm run dev
-```
+The descision to use `error` over `warn` was made a long time ago by the FB team and isn't going to change anytime soon.
 
-Abrir en el navegador la dirección indicada por Vite, normalmente:
+The source can be found here: https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js
+The reasoning can be found here and elsewhere: https://github.com/facebook/fbjs/pull/94#issuecomment-168332326
 
-http://localhost:5173/
+> Can I add X feature?
 
-En Windows PowerShell, si existe una restricción para ejecutar scripts, se pueden utilizar los comandos `npm.cmd` y `npx.cmd`.
+This is a mirror of Facebook's (FB) [warning](https://github.com/facebook/fbjs/blob/master/packages/fbjs/src/__forks__/warning.js) and as such the source and signature will mirror that module.
 
-## Pruebas automáticas
+If you believe a feature is missing than please open a feature request [there](https://github.com/facebook/fbjs).
+If it is approved and merged in that this module will be updated to reflect that change, otherwise this module will not change.
 
-El proyecto utiliza Vitest y React Testing Library para comprobar el funcionamiento de sus componentes y funcionalidades.
+## Use in Production
 
-Ejecutar todas las pruebas:
-
-```bash
-npx vitest run
-```
-
-Resultado de la última ejecución verificada:
-
-- **57 pruebas aprobadas.**
-- **14 archivos de pruebas aprobados.**
-- **0 pruebas fallidas.**
-
-Entre las funcionalidades probadas se encuentran el inicio de sesión, registro, agendamiento de citas, confirmación de reservas, administración de servicios, contexto y almacenamiento de datos.
-
-## Cobertura de pruebas
-
-Para generar el informe de cobertura:
-
-```bash
-npx vitest run --coverage
-```
-
-Resultados de la última ejecución verificada:
-
-| Indicador | Cobertura |
-|---|---:|
-| Sentencias | 82,22 % |
-| Ramas | 87,58 % |
-| Funciones | 73,33 % |
-| Líneas | 82,09 % |
-
-El informe HTML de cobertura se genera en la carpeta `coverage`.
-
-## Control de versiones
-
-El proyecto utiliza Git y GitHub para el control de versiones y el trabajo colaborativo.
-
-Repositorio:
-
-https://github.com/joaberrios/nutrivida-frontend
-
-## Integrantes
-
-- Joaquín
-- Dastin
-
-## Contexto académico
-
-Proyecto desarrollado como parte de una evaluación académica de desarrollo web con React.
+It is recommended to add [babel-plugin-dev-expression](https://github.com/4Catalyzer/babel-plugin-dev-expression) with this module to remove warning messages in production.
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<small>Don't Forget To Be Awesome</small>
