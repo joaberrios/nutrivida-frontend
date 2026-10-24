@@ -1,4 +1,3 @@
-
 const CLAVE_CITAS = 'nutrivida_citas'
 
 export function listarCitas() {
@@ -32,7 +31,10 @@ export function guardarCita(datos) {
 
   const nuevaCita = {
     ...datos,
-    id: crypto.randomUUID(),
+    id: typeof crypto !== 'undefined' &&
+      typeof crypto.randomUUID === 'function'
+        ? crypto.randomUUID()
+        : `cita-${Date.now()}-${Math.random().toString(36).slice(2)}`,
     estado: 'Confirmada'
   }
 
