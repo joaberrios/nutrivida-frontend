@@ -1,0 +1,18 @@
+[1mdiff --git a/README.md b/README.md[m
+[1mindex f6ec03b..cc267f8 100644[m
+[1m--- a/README.md[m
+[1m+++ b/README.md[m
+[36m@@ -129,10 +129,10 @@[m [mResultados de la última ejecución verificada:[m
+ [m
+ | Indicador | Cobertura |[m
+ |---|---:|[m
+[31m-| Sentencias | 82,22 % |[m
+[32m+[m[32m| Sentencias | 81,49 % |[m
+ | Ramas | 87,58 % |[m
+[31m-| Funciones | 73,33 % |[m
+[31m-| Líneas | 82,09 % |[m
+[32m+[m[32m| Funciones | 71,73 % |[m
+[32m+[m[32m| Líneas | 81,34 % |[m
+ [m
+ El informe HTML de cobertura se genera en la carpeta `coverage`.[m
+ [m

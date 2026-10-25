@@ -1,4 +1,3 @@
-
 import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
@@ -82,7 +81,7 @@ function Categorias() {
                   <div className="mt-auto">
                     <Button
                       as={Link}
-                      to="/catalogo"
+                      to={`/catalogo?categoria=${encodeURIComponent(categoria.nombre)}`}
                       variant="success"
                       className="w-100"
                     >
