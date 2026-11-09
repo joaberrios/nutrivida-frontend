@@ -152,3 +152,21 @@ https://github.com/joaberrios/nutrivida-frontend
 ## Contexto académico
 
 Proyecto desarrollado como parte de una evaluación académica de desarrollo web con React.
+
+## Estructura del proyecto
+
+El código está organizado con Atomic Design:
+
+- `components/atoms`: elementos básicos reutilizables, como `Boton`, `CampoTexto`, `Precio` y etiquetas.
+- `components/molecules`: componentes que combinan átomos, como `CampoFormulario` y `TarjetaServicio`.
+- `components/organisms`: secciones completas, como navegación, pie de página y formularios.
+- `components/templates`: estructuras de página reutilizables.
+- `pages`: pantallas asociadas a las rutas.
+- `context`: estado compartido de la aplicación.
+- `services`: reglas y operaciones de citas y servicios.
+- `data`: datos iniciales.
+- `utils`: funciones auxiliares.
+
+## Componentes reutilizables
+
+La aplicación utiliza un único componente `Boton` basado en React Bootstrap. Se puede configurar mediante propiedades como `texto`, `children`, `variant`, `tipo`, `className`, `onClick`, `as` y `to`. Así se mantiene una apariencia consistente sin duplicar componentes de botón.
