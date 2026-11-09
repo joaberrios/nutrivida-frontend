@@ -1,14 +1,12 @@
 
-import {
-  Container,
+import {Container,
   Row,
   Col,
   Card,
-  Button,
-  Badge
-} from 'react-bootstrap'
+  Badge} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
+import Boton from '../components/atoms/Boton'
 
 function Inicio() {
   const beneficios = [
@@ -60,23 +58,23 @@ function Inicio() {
             </p>
 
             <div className="d-flex gap-3 flex-wrap mt-4">
-              <Button
+              <Boton
                 as={Link}
                 to="/nueva-cita"
                 variant="success"
                 size="lg"
               >
                 Agendar una cita
-              </Button>
+              </Boton>
 
-              <Button
+              <Boton
                 as={Link}
                 to="/catalogo"
                 variant="outline-success"
                 size="lg"
               >
                 Ver servicios
-              </Button>
+              </Boton>
             </div>
           </Col>
 
@@ -156,13 +154,13 @@ function Inicio() {
               </Col>
 
               <Col md={4} className="text-md-end">
-                <Button
+                <Boton
                   as={Link}
                   to="/categorias"
                   variant="success"
                 >
                   Ver categorías
-                </Button>
+                </Boton>
               </Col>
             </Row>
           </Card.Body>
@@ -204,13 +202,13 @@ function Inicio() {
                   nutricionales disponibles en nuestro catálogo.
                 </p>
 
-                <Button
+                <Boton
                   as={Link}
                   to="/catalogo"
                   variant="outline-success"
                 >
                   Explorar catálogo
-                </Button>
+                </Boton>
               </Card.Body>
             </Card>
           </Col>
@@ -226,14 +224,14 @@ function Inicio() {
             Encuentra nuestros servicios y reserva tu próxima atención.
           </p>
 
-          <Button
+          <Boton
             as={Link}
             to="/menu"
             variant="success"
             size="lg"
           >
             Ir al menú principal
-          </Button>
+          </Boton>
         </div>
 
       </Container>

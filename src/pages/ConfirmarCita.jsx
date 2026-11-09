@@ -1,8 +1,9 @@
 
-import { Container, Card, Button } from 'react-bootstrap'
+import {Container, Card} from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 import { guardarCita } from '../services/citasService'
+import Boton from '../components/atoms/Boton'
 
 function ConfirmarCita() {
   const location = useLocation()
@@ -34,12 +35,12 @@ function ConfirmarCita() {
         <Container className="py-5 text-center">
           <h2>No hay datos de una cita</h2>
 
-          <Button
+          <Boton
             variant="success"
             onClick={() => navigate('/nueva-cita')}
           >
             Volver a agendar
-          </Button>
+          </Boton>
         </Container>
       </PlantillaPublica>
     )
@@ -75,20 +76,20 @@ function ConfirmarCita() {
               <strong>Hora:</strong> {datos.hora}
             </p>
 
-            <Button
+            <Boton
               variant="success"
               className="me-2"
               onClick={confirmarReserva}
             >
               Confirmar cita
-            </Button>
+            </Boton>
 
-            <Button
+            <Boton
               variant="secondary"
               onClick={() => navigate('/nueva-cita')}
             >
               Volver
-            </Button>
+            </Boton>
           </Card.Body>
         </Card>
       </Container>

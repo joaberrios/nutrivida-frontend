@@ -1,13 +1,11 @@
 import Button from 'react-bootstrap/Button'
 
-function Boton({ texto, tipo = 'button', alHacerClick }) {
+// Botón único reutilizable para toda la aplicación.
+// Acepta texto o children y conserva las propiedades de React Bootstrap.
+function Boton({ texto, children, tipo = 'button', variant = 'success', ...props }) {
   return (
-    <Button
-      variant="success"
-      type={tipo}
-      onClick={alHacerClick}
-    >
-      {texto}
+    <Button type={tipo} variant={variant} {...props}>
+      {children ?? texto}
     </Button>
   )
 }

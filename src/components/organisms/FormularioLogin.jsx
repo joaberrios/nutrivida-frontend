@@ -3,7 +3,7 @@ import { useNavigate, Link } from 'react-router-dom'
 import Form from 'react-bootstrap/Form'
 
 import CampoFormulario from '../molecules/CampoFormulario'
-import BotonLogin from '../atoms/BotonLogin'
+import Boton from '../atoms/Boton'
 
 const usuariosPermitidos = {
   'joa.berrios@duocuc.cl': '1212',
@@ -112,7 +112,7 @@ function FormularioLogin() {
         }}
       />
 
-      <BotonLogin texto="Iniciar sesión" />
+      <Boton texto="Iniciar sesión" tipo="submit" className="w-100" />
 
       {mensaje && (
         <p className="text-center mt-3 text-danger">

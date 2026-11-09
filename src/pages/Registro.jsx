@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Container, Card, Form, Button, Alert } from 'react-bootstrap'
+import {Container, Card, Form, Alert} from 'react-bootstrap'
+import Boton from '../components/atoms/Boton'
 
 const dominiosPermitidos = [
   '@duocuc.cl',
@@ -198,13 +199,13 @@ function Registro() {
               />
             </Form.Group>
 
-            <Button
+            <Boton
               type="submit"
               variant="success"
               className="w-100"
             >
               Registrarse
-            </Button>
+            </Boton>
           </Form>
 
           <p className="text-center mt-3 mb-0">

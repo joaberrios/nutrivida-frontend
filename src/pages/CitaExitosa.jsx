@@ -1,7 +1,8 @@
 
-import { Container, Card, Button } from 'react-bootstrap'
+import {Container, Card} from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
+import Boton from '../components/atoms/Boton'
 
 function CitaExitosa() {
   const navigate = useNavigate()
@@ -37,12 +38,12 @@ function CitaExitosa() {
               </>
             )}
 
-            <Button
+            <Boton
               variant="success"
               onClick={() => navigate('/inicio')}
             >
               Volver al inicio
-            </Button>
+            </Boton>
           </Card.Body>
         </Card>
       </Container>

@@ -1,7 +1,7 @@
-
-import { Container, Row, Col, Card, Button, Badge } from 'react-bootstrap'
+import {Container, Row, Col, Card, Badge} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
+import Boton from '../components/atoms/Boton'
 
 function Categorias() {
   const categorias = [
@@ -80,14 +80,14 @@ function Categorias() {
                   </ul>
 
                   <div className="mt-auto">
-                    <Button
+                    <Boton
                       as={Link}
-                      to="/catalogo"
+                      to={`/catalogo?categoria=${encodeURIComponent(categoria.nombre)}`}
                       variant="success"
                       className="w-100"
                     >
                       Explorar servicios
-                    </Button>
+                    </Boton>
                   </div>
 
                 </Card.Body>
@@ -108,13 +108,13 @@ function Categorias() {
             </p>
 
             <div className="d-flex justify-content-center gap-2 flex-wrap">
-              <Button as={Link} to="/nueva-cita" variant="success">
+              <Boton as={Link} to="/nueva-cita" variant="success">
                 Agendar una cita
-              </Button>
+              </Boton>
 
-              <Button as={Link} to="/menu" variant="outline-success">
+              <Boton as={Link} to="/menu" variant="outline-success">
                 Volver al menú
-              </Button>
+              </Boton>
             </div>
           </Card.Body>
         </Card>

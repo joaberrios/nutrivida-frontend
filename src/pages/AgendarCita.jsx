@@ -1,17 +1,15 @@
 
 import { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import {
-  Container,
+import {Container,
   Form,
-  Button,
   Card,
   Alert,
   Row,
-  Col
-} from 'react-bootstrap'
+  Col} from 'react-bootstrap'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 import { ServiciosContext } from '../context/ServiciosContext'
+import Boton from '../components/atoms/Boton'
 
 function obtenerFechaLocal(fecha = new Date()) {
   const anio = fecha.getFullYear()
@@ -288,17 +286,17 @@ function AgendarCita() {
               )}
 
               <div className="d-flex gap-2 flex-wrap mt-3">
-                <Button variant="success" type="submit">
+                <Boton variant="success" type="submit">
                   Continuar a confirmación
-                </Button>
+                </Boton>
 
-                <Button
+                <Boton
                   variant="outline-secondary"
                   type="button"
                   onClick={() => navigate('/menu')}
                 >
                   Volver al menú
-                </Button>
+                </Boton>
               </div>
             </Form>
           </Card.Body>

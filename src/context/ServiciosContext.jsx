@@ -1,4 +1,6 @@
+
 import { createContext, useState } from 'react'
+
 import {
   listarServicios,
   crearServicio,
@@ -6,35 +8,39 @@ import {
   eliminarServicio
 } from '../services/serviciosService'
 
-export const ServiciosContext = createContext()
+export const ServiciosContext = createContext(null)
 
 export function ServiciosProvider({ children }) {
-  const [servicios, setServicios] = useState(listarServicios())
+  const [servicios, setServicios] = useState(() => listarServicios())
+
+  function actualizarLista() {
+    setServicios(listarServicios())
+  }
 
   function agregarServicio(nuevoServicio) {
     crearServicio(nuevoServicio)
-    setServicios(listarServicios())
+    actualizarLista()
   }
 
   function editarServicio(codigo, datos) {
     actualizarServicio(codigo, datos)
-    setServicios(listarServicios())
+    actualizarLista()
   }
 
   function borrarServicio(codigo) {
     eliminarServicio(codigo)
-    setServicios(listarServicios())
+    actualizarLista()
+  }
+
+  const valor = {
+    servicios,
+    agregarServicio,
+    editarServicio,
+    borrarServicio
   }
 
   return (
-    <ServiciosContext.Provider
-      value={{
-        servicios,
-        agregarServicio,
-        editarServicio,
-        borrarServicio
-      }}
-    >
+    <ServiciosContext.Provider value={valor}>
       {children}
     </ServiciosContext.Provider>
   )

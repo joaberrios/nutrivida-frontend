@@ -1,9 +1,21 @@
-body {
-  margin: 0;
-  font-family: Arial, sans-serif;
-  background-color: #f4f8f4;
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap');
+
+:root {
+  font-family: 'DM Sans', Arial, sans-serif;
+  color: #24352d;
+  background: #f6f8f5;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
+html { min-width: 320px; scroll-behavior: smooth; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #f6f8f5; }
+button, input, select, textarea { font: inherit; }
+h1, h2, h3, h4, h5, .navbar-brand { font-family: 'Manrope', 'DM Sans', sans-serif; }
+.card { border-radius: 1rem; }
+.btn { border-radius: .7rem; font-weight: 600; padding: .65rem 1.1rem; }
+.form-control, .form-select { border-radius: .65rem; padding: .7rem .85rem; }
+.form-control:focus, .form-select:focus { border-color: #5b9c70; box-shadow: 0 0 0 .2rem rgb(38 122 70 / 12%); }
+.navbar { box-shadow: 0 2px 14px rgb(20 50 30 / 8%); }
+img { max-width: 100%; }

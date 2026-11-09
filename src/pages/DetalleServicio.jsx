@@ -1,6 +1,6 @@
 import { useContext } from 'react'
 import { useParams } from 'react-router-dom'
-import { Container, Card } from 'react-bootstrap'
+import {Container, Card} from 'react-bootstrap'
 import { ServiciosContext } from '../context/ServiciosContext'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 import Precio from '../components/atoms/Precio'

@@ -41,7 +41,7 @@ function TarjetaServicio(props) {
 
         <Boton
           texto="Ver servicio"
-          alHacerClick={verDetalle}
+          onClick={verDetalle}
         />
       </Card.Body>
     </Card>

@@ -1,7 +1,8 @@
 
-import { Container, Card, Button } from 'react-bootstrap'
+import {Container, Card} from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
+import Boton from '../components/atoms/Boton'
 
 function CitaError() {
   const navigate = useNavigate()
@@ -30,12 +31,12 @@ function CitaError() {
               nuevamente los datos.
             </p>
 
-            <Button
+            <Boton
               variant="danger"
               onClick={() => navigate('/nueva-cita')}
             >
               Intentar nuevamente
-            </Button>
+            </Boton>
           </Card.Body>
         </Card>
       </Container>

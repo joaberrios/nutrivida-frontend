@@ -1,6 +1,7 @@
 
-import { Container, Row, Col, Card, Button } from 'react-bootstrap'
+import {Container, Row, Col, Card} from 'react-bootstrap'
 import { Link } from 'react-router-dom'
+import Boton from '../components/atoms/Boton'
 
 function MenuPrincipal() {
   return (
@@ -23,9 +24,9 @@ function MenuPrincipal() {
               <Card.Text>
                 Conoce nuestras consultas y programas nutricionales.
               </Card.Text>
-              <Button as={Link} to="/catalogo" variant="success">
+              <Boton as={Link} to="/catalogo" variant="success">
                 Ver servicios
-              </Button>
+              </Boton>
             </Card.Body>
           </Card>
         </Col>
@@ -38,9 +39,9 @@ function MenuPrincipal() {
               <Card.Text>
                 Encuentra los servicios según el tipo de atención.
               </Card.Text>
-              <Button as={Link} to="/categorias" variant="success">
+              <Boton as={Link} to="/categorias" variant="success">
                 Ver categorías
-              </Button>
+              </Boton>
             </Card.Body>
           </Card>
         </Col>
@@ -53,9 +54,9 @@ function MenuPrincipal() {
               <Card.Text>
                 Reserva una atención nutricional de forma sencilla.
               </Card.Text>
-              <Button as={Link} to="/nueva-cita" variant="success">
+              <Boton as={Link} to="/nueva-cita" variant="success">
                 Agendar ahora
-              </Button>
+              </Boton>
             </Card.Body>
           </Card>
         </Col>
@@ -68,18 +69,18 @@ function MenuPrincipal() {
               <Card.Text>
                 Agrega, edita o elimina servicios nutricionales.
               </Card.Text>
-              <Button as={Link} to="/admin-servicios" variant="dark">
+              <Boton as={Link} to="/admin-servicios" variant="dark">
                 Administrar
-              </Button>
+              </Boton>
             </Card.Body>
           </Card>
         </Col>
       </Row>
 
       <div className="text-center mt-5">
-        <Button as={Link} to="/login" variant="outline-secondary">
+        <Boton as={Link} to="/login" variant="outline-secondary">
           Volver al inicio de sesión
-        </Button>
+        </Boton>
       </div>
     </Container>
   )
