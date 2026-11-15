@@ -1,14 +1,11 @@
+
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Form from 'react-bootstrap/Form'
 
 import CampoFormulario from '../molecules/CampoFormulario'
 import BotonLogin from '../atoms/BotonLogin'
-
-const usuariosPermitidos = {
-  'joa.berrios@duocuc.cl': '1212',
-  'das.rojas@duocuc.cl': '2121'
-}
+import { usarAutenticacion } from '../../context/AutenticacionContext'
 
 const dominiosPermitidos = [
   '@duocuc.cl',
@@ -20,22 +17,38 @@ function FormularioLogin() {
   const [correo, setCorreo] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [mensaje, setMensaje] = useState('')
+  const [cargando, setCargando] = useState(false)
 
   const navigate = useNavigate()
 
-  function iniciarSesion(event) {
-    event.preventDefault()
+  const {
+    iniciarSesion,
+    sesionVencida
+  } = usarAutenticacion()
+
+  async function enviarFormulario(evento) {
+    evento.preventDefault()
+
+    if (cargando) return
+
+    setMensaje('')
 
     const correoLimpio = correo.trim().toLowerCase()
-    const contrasenaLimpia = contrasena.trim()
 
-    if (!correoLimpio || !contrasenaLimpia) {
+    if (!correoLimpio || !contrasena) {
       setMensaje('Debe completar todos los campos')
       return
     }
 
-    const correoValido = dominiosPermitidos.some((dominio) =>
-      correoLimpio.endsWith(dominio)
+    const formatoCorreo = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
+
+    if (!formatoCorreo.test(correoLimpio)) {
+      setMensaje('Ingrese un correo electrónico válido')
+      return
+    }
+
+    const correoValido = dominiosPermitidos.some(
+      (dominio) => correoLimpio.endsWith(dominio)
     )
 
     if (!correoValido) {
@@ -45,89 +58,100 @@ function FormularioLogin() {
       return
     }
 
+    setCargando(true)
+
     try {
-      const usuariosGuardados = JSON.parse(
-        localStorage.getItem('nutrivida_usuarios') || '[]'
-      )
+      await iniciarSesion(correoLimpio, contrasena)
 
-      if (!Array.isArray(usuariosGuardados)) {
-        throw new Error('Datos de usuarios inválidos')
-      }
-
-      const usuarioRegistrado = usuariosGuardados.find(
-        (usuario) => usuario.correo === correoLimpio
-      )
-
-      const cuentaOriginal = Object.hasOwn(
-        usuariosPermitidos,
-        correoLimpio
-      )
-
-      if (!cuentaOriginal && !usuarioRegistrado) {
-        setMensaje('Cuenta no encontrada')
-        return
-      }
-
-      const contrasenaCorrecta = cuentaOriginal
-        ? usuariosPermitidos[correoLimpio]
-        : usuarioRegistrado.contrasena
-
-      if (contrasenaCorrecta !== contrasenaLimpia) {
-        setMensaje('Contraseña incorrecta')
-        return
-      }
-
+      setContrasena('')
       setMensaje('')
-      navigate('/menu')
-    } catch {
-      setMensaje('No se pudieron comprobar los usuarios registrados.')
+
+      navigate('/menu', { replace: true })
+
+    } catch (error) {
+      if (error.estado === 401) {
+        setMensaje('Correo o contraseña incorrectos')
+      } else if (error.estado === 429) {
+        setMensaje(
+          'Demasiados intentos. Inténtelo más tarde.'
+        )
+      } else {
+        setMensaje(
+          error.message || 'No se pudo iniciar sesión'
+        )
+      }
+    } finally {
+      setCargando(false)
     }
   }
 
   return (
-    <Form onSubmit={iniciarSesion}>
+    <Form onSubmit={enviarFormulario} noValidate>
+
       <h2 className="text-center mb-4">
         Iniciar sesión
       </h2>
 
-      <CampoFormulario
-        etiqueta="Correo electrónico"
-        tipo="email"
-        placeholder="Ingrese su correo"
-        valor={correo}
-        alCambiar={(event) => {
-          setCorreo(event.target.value)
-          setMensaje('')
-        }}
-      />
+      {sesionVencida && (
+        <p className="text-center text-warning" role="alert">
+          Su sesión ha vencido. Inicie sesión nuevamente.
+        </p>
+      )}
 
-      <CampoFormulario
-        etiqueta="Contraseña"
-        tipo="password"
-        placeholder="Ingrese su contraseña"
-        valor={contrasena}
-        alCambiar={(event) => {
-          setContrasena(event.target.value)
-          setMensaje('')
-        }}
-      />
+      <fieldset disabled={cargando}>
 
-      <BotonLogin texto="Iniciar sesión" />
+        <CampoFormulario
+          etiqueta="Correo electrónico"
+          tipo="email"
+          placeholder="Ingrese su correo"
+          valor={correo}
+          alCambiar={(evento) => {
+            setCorreo(evento.target.value)
+            setMensaje('')
+          }}
+        />
+
+        <CampoFormulario
+          etiqueta="Contraseña"
+          tipo="password"
+          placeholder="Ingrese su contraseña"
+          valor={contrasena}
+          alCambiar={(evento) => {
+            setContrasena(evento.target.value)
+            setMensaje('')
+          }}
+        />
+
+        <BotonLogin
+          texto={
+            cargando
+              ? 'Iniciando sesión...'
+              : 'Iniciar sesión'
+          }
+        />
+
+      </fieldset>
 
       {mensaje && (
-        <p className="text-center mt-3 text-danger">
+        <p
+          className="text-center mt-3 text-danger"
+          role="alert"
+        >
           {mensaje}
         </p>
       )}
 
       <p className="text-center mt-3">
         ¿No tienes una cuenta?{' '}
+
         <Link to="/registro">
           Regístrate aquí
         </Link>
       </p>
+
     </Form>
   )
 }
 
 export default FormularioLogin
+

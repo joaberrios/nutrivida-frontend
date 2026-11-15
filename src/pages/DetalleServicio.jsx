@@ -1,64 +1,105 @@
+
 import { useContext } from 'react'
 import { useParams } from 'react-router-dom'
-import { Container, Card } from 'react-bootstrap'
-import { ServiciosContext } from '../context/ServiciosContext'
+import {
+  Container,
+  Card,
+  Spinner,
+  Alert,
+  Button
+} from 'react-bootstrap'
+
+import { CatalogoContext } from '../context/CatalogoContext'
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 import Precio from '../components/atoms/Precio'
 import EtiquetaModalidad from '../components/atoms/EtiquetaModalidad'
 
 function DetalleServicio() {
   const { codigo } = useParams()
-  const { servicios } = useContext(ServiciosContext)
+
+  const {
+    servicios,
+    cargando,
+    error,
+    recargarCatalogo
+  } = useContext(CatalogoContext)
 
   const servicio = servicios.find(
     (servicio) => servicio.codigo === codigo
   )
 
-  if (!servicio) {
-    return (
-      <PlantillaPublica>
-        <Container className="py-5 text-center">
-          <h2>Servicio no encontrado</h2>
-        </Container>
-      </PlantillaPublica>
-    )
-  }
-
   return (
     <PlantillaPublica>
       <Container className="py-5">
-        <Card className="shadow-sm">
-          <Card.Body>
-            <Card.Title>{servicio.nombre}</Card.Title>
 
-            <Card.Subtitle className="mb-3 text-muted">
-              {servicio.tipo}
-            </Card.Subtitle>
+        {cargando ? (
+          <div className="text-center" role="status">
+            <Spinner animation="border" variant="success" />
 
-            <Card.Text>
-              {servicio.descripcion}
-            </Card.Text>
-
-            <p>
-              <strong>Código:</strong> {servicio.codigo}
+            <p className="mt-3">
+              Cargando información del servicio...
             </p>
+          </div>
 
-            <p>
-              <strong>Duración:</strong> {servicio.duracion}
-            </p>
+        ) : error ? (
+          <Alert variant="danger">
+            <p>{error}</p>
 
-            <p>
-              <strong>Modalidad: </strong>
-              <EtiquetaModalidad modalidad={servicio.modalidad} />
-            </p>
+            <Button
+              variant="outline-danger"
+              onClick={recargarCatalogo}
+            >
+              Reintentar
+            </Button>
+          </Alert>
 
-            <p>
-              <strong>Profesional:</strong> {servicio.profesional}
-            </p>
+        ) : !servicio ? (
+          <div className="text-center">
+            <h2>Servicio no encontrado</h2>
+          </div>
 
-            <Precio valor={servicio.precio} />
-          </Card.Body>
-        </Card>
+        ) : (
+          <Card className="shadow-sm">
+            <Card.Body>
+
+              <Card.Title>
+                {servicio.nombre}
+              </Card.Title>
+
+              <Card.Subtitle className="mb-3 text-muted">
+                {servicio.tipo}
+              </Card.Subtitle>
+
+              <Card.Text>
+                {servicio.descripcion}
+              </Card.Text>
+
+              <p>
+                <strong>Código:</strong> {servicio.codigo}
+              </p>
+
+              <p>
+                <strong>Duración:</strong> {servicio.duracion}
+              </p>
+
+              <p>
+                <strong>Modalidad: </strong>
+
+                <EtiquetaModalidad
+                  modalidad={servicio.modalidad}
+                />
+              </p>
+
+              <p>
+                <strong>Profesional:</strong> {servicio.profesional}
+              </p>
+
+              <Precio valor={servicio.precio} />
+
+            </Card.Body>
+          </Card>
+        )}
+
       </Container>
     </PlantillaPublica>
   )

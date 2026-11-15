@@ -1,51 +1,100 @@
 
 import { useContext, useState } from 'react'
-import { Row, Col, Alert } from 'react-bootstrap'
-import { ServiciosContext } from '../../context/ServiciosContext'
+import {
+  Row,
+  Col,
+  Alert,
+  Spinner,
+  Button
+} from 'react-bootstrap'
+
+import { CatalogoContext } from '../../context/CatalogoContext'
 import TarjetaServicio from '../molecules/TarjetaServicio'
 import Buscador from '../atoms/Buscador'
 
-function ListaServicios({ categoria = null }) {
-  const { servicios } = useContext(ServiciosContext)
-  const [busqueda, setBusqueda] = useState('')
+function normalizar(texto) {
+  return String(texto || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+}
 
-  const normalizar = (texto) =>
-    String(texto || '')
-      .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '')
-      .toLowerCase()
-      .trim()
+function obtenerCategoria(texto) {
+  const categoria = normalizar(texto)
+
+  if (categoria === 'consultas') {
+    return 'consulta'
+  }
+
+  if (categoria === 'planes especializados') {
+    return 'plan especializado'
+  }
+
+  return categoria
+}
+
+function ListaServicios({ categoria = null }) {
+  const {
+    servicios,
+    cargando,
+    error,
+    recargarCatalogo
+  } = useContext(CatalogoContext)
+
+  const [busqueda, setBusqueda] = useState('')
 
   const serviciosFiltrados = servicios.filter((servicio) => {
     const nombre = normalizar(servicio.nombre)
-    const tipo = normalizar(servicio.tipo)
+    const tipo = obtenerCategoria(servicio.tipo)
+
     const textoBusqueda = normalizar(busqueda)
-    const categoriaSeleccionada = normalizar(categoria)
+    const categoriaSeleccionada = obtenerCategoria(categoria)
 
-    const coincideBusqueda = nombre.includes(textoBusqueda)
+    const coincideBusqueda =
+      nombre.includes(textoBusqueda)
 
-    let coincideCategoria = true
-
-    if (categoriaSeleccionada === 'consultas') {
-      coincideCategoria =
-        tipo.includes('consulta') ||
-        tipo.includes('evaluacion') ||
-        tipo.includes('control') ||
-        nombre.includes('consulta') ||
-        nombre.includes('evaluacion') ||
-        nombre.includes('control')
-    }
-
-    if (categoriaSeleccionada === 'planes especializados') {
-      coincideCategoria =
-        tipo.includes('plan') ||
-        tipo.includes('programa') ||
-        nombre.includes('plan') ||
-        nombre.includes('programa')
-    }
+    const coincideCategoria =
+      !categoriaSeleccionada ||
+      tipo === categoriaSeleccionada
 
     return coincideBusqueda && coincideCategoria
   })
+
+  if (cargando) {
+    return (
+      <div className="text-center py-5" role="status">
+        <Spinner animation="border" variant="success" />
+
+        <p className="mt-3">
+          Cargando servicios disponibles...
+        </p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <Alert variant="danger" className="text-center">
+        <p>{error}</p>
+
+        <Button
+          variant="outline-danger"
+          onClick={recargarCatalogo}
+        >
+          Reintentar
+        </Button>
+      </Alert>
+    )
+  }
+
+  if (servicios.length === 0) {
+    return (
+      <Alert variant="info" className="text-center">
+        Actualmente no hay servicios disponibles.
+      </Alert>
+    )
+  }
 
   return (
     <>

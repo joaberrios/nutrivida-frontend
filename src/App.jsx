@@ -1,4 +1,7 @@
-import { Routes, Route, Navigate } from 'react-router-dom'
+
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
+import { CatalogoProvider } from './context/CatalogoContext'
+import RutaProtegida from './components/templates/RutaProtegida'
 
 import Login from './pages/Login'
 import Registro from './pages/Registro'
@@ -16,29 +19,80 @@ import AdminServicios from './pages/AdminServicios'
 function App() {
   return (
     <Routes>
+
+      {/* Rutas públicas */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
-
       <Route path="/inicio" element={<Inicio />} />
-      <Route path="/menu" element={<MenuPrincipal />} />
-
-      <Route path="/catalogo" element={<Servicios />} />
       <Route path="/categorias" element={<Categorias />} />
-      <Route path="/catalogo/:codigo" element={<DetalleServicio />} />
 
-      <Route path="/nueva-cita" element={<AgendarCita />} />
-      <Route path="/confirmar-cita" element={<ConfirmarCita />} />
-      <Route path="/cita-exitosa" element={<CitaExitosa />} />
-      <Route path="/cita-error" element={<CitaError />} />
+      {/* Catálogo público */}
+      <Route
+        element={
+          <CatalogoProvider>
+            <Outlet />
+          </CatalogoProvider>
+        }
+      >
+        <Route path="/catalogo" element={<Servicios />} />
+
+        <Route
+          path="/catalogo/:codigo"
+          element={<DetalleServicio />}
+        />
+      </Route>
+
+      {/* Usuarios autenticados */}
+      <Route element={<RutaProtegida />}>
+        <Route path="/menu" element={<MenuPrincipal />} />
+      </Route>
+
+      {/* Rutas exclusivas para pacientes */}
+      <Route
+        element={<RutaProtegida roles={['paciente']} />}
+      >
+        <Route
+          path="/nueva-cita"
+          element={<AgendarCita />}
+        />
+
+        <Route
+          path="/confirmar-cita"
+          element={<ConfirmarCita />}
+        />
+
+        <Route
+          path="/cita-exitosa"
+          element={<CitaExitosa />}
+        />
+
+        <Route
+          path="/cita-error"
+          element={<CitaError />}
+        />
+      </Route>
+
+      {/* Rutas exclusivas para administradores */}
+      <Route
+        element={<RutaProtegida roles={['administrador']} />}
+      >
+      <Route
+         path="/admin-servicios"
+         element={
+         <CatalogoProvider>
+         <AdminServicios />
+         </CatalogoProvider>
+  }
+/>
+      </Route>
 
       <Route
-        path="/admin-servicios"
-        element={<AdminServicios />}
+        path="*"
+        element={<Navigate to="/login" replace />}
       />
 
-      <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   )
 }

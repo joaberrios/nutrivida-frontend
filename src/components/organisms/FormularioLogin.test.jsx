@@ -1,9 +1,31 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi
+} from 'vitest'
+
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  waitFor
+} from '@testing-library/react'
+
 import { MemoryRouter } from 'react-router-dom'
+import { AutenticacionProvider } from '../../context/AutenticacionContext'
+import { iniciarSesion } from '../../services/autenticacionService'
 import FormularioLogin from './FormularioLogin'
 
 const navegar = vi.fn()
+
+vi.mock('../../services/autenticacionService', () => ({
+  iniciarSesion: vi.fn()
+}))
 
 vi.mock('react-router-dom', async () => {
   const original = await vi.importActual('react-router-dom')
@@ -15,9 +37,11 @@ vi.mock('react-router-dom', async () => {
 })
 
 describe('Formulario de login de NutriVida', () => {
+
   beforeEach(() => {
     localStorage.clear()
-    navegar.mockClear()
+    sessionStorage.clear()
+    vi.resetAllMocks()
   })
 
   afterEach(() => {
@@ -27,72 +51,185 @@ describe('Formulario de login de NutriVida', () => {
   function mostrarLogin() {
     render(
       <MemoryRouter>
-        <FormularioLogin />
+        <AutenticacionProvider>
+          <FormularioLogin />
+        </AutenticacionProvider>
       </MemoryRouter>
     )
   }
 
   function ingresarDatos(correo, contrasena) {
-    fireEvent.change(screen.getByPlaceholderText('Ingrese su correo'), {
-      target: { value: correo }
-    })
+    fireEvent.change(
+      screen.getByPlaceholderText('Ingrese su correo'),
+      { target: { value: correo } }
+    )
 
-    fireEvent.change(screen.getByPlaceholderText('Ingrese su contraseña'), {
-      target: { value: contrasena }
-    })
+    fireEvent.change(
+      screen.getByPlaceholderText('Ingrese su contraseña'),
+      { target: { value: contrasena } }
+    )
 
     fireEvent.click(
-      screen.getByRole('button', { name: /iniciar sesión/i })
+      screen.getByRole('button', {
+        name: 'Iniciar sesión'
+      })
     )
   }
 
   it('muestra el formulario de inicio de sesión', () => {
     mostrarLogin()
 
-  expect(
-    screen.getByRole('heading', { name: 'Iniciar sesión' })
-  ).toBeInTheDocument()    
-  expect(
-      screen.getByPlaceholderText('Ingrese su correo')
+    expect(
+      screen.getByRole('heading', {
+        name: 'Iniciar sesión'
+      })
     ).toBeInTheDocument()
   })
 
-  it('muestra un error cuando los campos están vacíos', () => {
+  it('rechaza campos vacíos', () => {
     mostrarLogin()
 
     fireEvent.click(
-      screen.getByRole('button', { name: /iniciar sesión/i })
+      screen.getByRole('button', {
+        name: 'Iniciar sesión'
+      })
     )
 
     expect(
       screen.getByText('Debe completar todos los campos')
     ).toBeInTheDocument()
+
+    expect(iniciarSesion).not.toHaveBeenCalled()
   })
 
-  it('rechaza correos con dominios no permitidos', () => {
+  it('rechaza dominios no permitidos', () => {
     mostrarLogin()
-    ingresarDatos('usuario@empresa.cl', '1234')
+
+    ingresarDatos(
+      'usuario@empresa.cl',
+      'NutrividaPrueba2026!'
+    )
 
     expect(
       screen.getByText(/Correo no permitido/i)
     ).toBeInTheDocument()
+
+    expect(iniciarSesion).not.toHaveBeenCalled()
   })
 
-  it('rechaza una contraseña incorrecta', () => {
+  it('rechaza credenciales incorrectas', async () => {
+    iniciarSesion.mockRejectedValue(
+      Object.assign(
+        new Error('Credenciales incorrectas'),
+        { estado: 401 }
+      )
+    )
+
     mostrarLogin()
-    ingresarDatos('joa.berrios@duocuc.cl', '9999')
+
+    ingresarDatos('usuario@gmail.com', 'incorrecta')
 
     expect(
-      screen.getByText('Contraseña incorrecta')
+      await screen.findByText(
+        'Correo o contraseña incorrectos'
+      )
     ).toBeInTheDocument()
 
     expect(navegar).not.toHaveBeenCalled()
   })
 
-  it('permite iniciar sesión con una cuenta autorizada', () => {
-    mostrarLogin()
-    ingresarDatos('joa.berrios@duocuc.cl', '1212')
+  it('permite iniciar sesión mediante la API', async () => {
+    iniciarSesion.mockResolvedValue({
+      accessToken: 'token-ficticio-de-prueba',
+      expiresIn: 1800,
+      usuario: {
+        id: 1,
+        nombre: 'Paciente',
+        correo: 'usuario@gmail.com',
+        rol: 'paciente'
+      }
+    })
 
-    expect(navegar).toHaveBeenCalledWith('/menu')
+    mostrarLogin()
+
+    ingresarDatos(
+      'Usuario@gmail.com',
+      'NutrividaPrueba2026!'
+    )
+
+    await waitFor(() => {
+      expect(navegar).toHaveBeenCalledWith(
+        '/menu',
+        { replace: true }
+      )
+    })
+
+    expect(iniciarSesion).toHaveBeenCalledWith({
+      correo: 'usuario@gmail.com',
+      contrasena: 'NutrividaPrueba2026!'
+    })
+
+    expect(localStorage.length).toBe(0)
+    expect(sessionStorage.length).toBe(0)
+  })
+
+  it('muestra un error de conexión', async () => {
+    iniciarSesion.mockRejectedValue(
+      new Error('No se pudo conectar con el servidor.')
+    )
+
+    mostrarLogin()
+
+    ingresarDatos(
+      'usuario@gmail.com',
+      'NutrividaPrueba2026!'
+    )
+
+    expect(
+      await screen.findByText(
+        'No se pudo conectar con el servidor.'
+      )
+    ).toBeInTheDocument()
+  })
+
+  it('bloquea el formulario durante la solicitud', () => {
+    iniciarSesion.mockImplementation(
+      () => new Promise(() => {})
+    )
+
+    mostrarLogin()
+
+    ingresarDatos(
+      'usuario@gmail.com',
+      'NutrividaPrueba2026!'
+    )
+
+    expect(
+      screen.getByRole('button', {
+        name: 'Iniciando sesión...'
+      })
+    ).toBeDisabled()
+  })
+
+  it('controla el exceso de intentos', async () => {
+    iniciarSesion.mockRejectedValue(
+      Object.assign(
+        new Error('Límite de intentos'),
+        { estado: 429 }
+      )
+    )
+
+    mostrarLogin()
+
+    ingresarDatos(
+      'usuario@gmail.com',
+      'NutrividaPrueba2026!'
+    )
+
+    expect(
+      await screen.findByText(
+        'Demasiados intentos. Inténtelo más tarde.'
+      )
+    ).toBeInTheDocument()
   })
 })

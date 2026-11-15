@@ -1,8 +1,10 @@
+
 import serviciosIniciales from '../data/servicios'
+import { solicitarApi } from './api'
 
 const CLAVE = 'servicios'
 
-// Carga los datos iniciales si todavía no existen
+// Cargar los datos iniciales
 function iniciarDatos() {
   const datos = localStorage.getItem(CLAVE)
 
@@ -11,7 +13,7 @@ function iniciarDatos() {
   }
 }
 
-// LISTAR
+// Listar servicios desde el almacenamiento local
 export function listarServicios() {
   iniciarDatos()
 
@@ -19,7 +21,7 @@ export function listarServicios() {
   return JSON.parse(datos)
 }
 
-// CREAR
+// Crear servicio
 export function crearServicio(nuevoServicio) {
   const servicios = listarServicios()
 
@@ -30,7 +32,7 @@ export function crearServicio(nuevoServicio) {
   return nuevoServicio
 }
 
-// ACTUALIZAR
+// Actualizar servicio
 export function actualizarServicio(codigo, servicioActualizado) {
   const servicios = listarServicios()
 
@@ -45,7 +47,7 @@ export function actualizarServicio(codigo, servicioActualizado) {
   return nuevosServicios
 }
 
-// ELIMINAR
+// Eliminar servicio
 export function eliminarServicio(codigo) {
   const servicios = listarServicios()
 
@@ -56,4 +58,41 @@ export function eliminarServicio(codigo) {
   localStorage.setItem(CLAVE, JSON.stringify(nuevosServicios))
 
   return nuevosServicios
+}
+
+// Listar servicios desde la API REST
+export async function listarServiciosApi(senal) {
+  return solicitarApi('/servicios', {
+    metodo: 'GET',
+    senal
+  })
+}
+
+export async function crearServicioApi(datos, token) {
+  return solicitarApi('/servicios', {
+    metodo: 'POST',
+    datos,
+    token
+  })
+}
+
+export async function actualizarServicioApi(codigo, datos, token) {
+  return solicitarApi(
+    `/servicios/${encodeURIComponent(codigo)}`,
+    {
+      metodo: 'PUT',
+      datos,
+      token
+    }
+  )
+}
+
+export async function eliminarServicioApi(codigo, token) {
+  return solicitarApi(
+    `/servicios/${encodeURIComponent(codigo)}`,
+    {
+      metodo: 'DELETE',
+      token
+    }
+  )
 }
