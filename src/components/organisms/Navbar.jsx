@@ -1,5 +1,4 @@
-
-import {
+﻿import {
   Navbar as BootstrapNavbar,
   Nav,
   Container
@@ -16,6 +15,12 @@ function Navbar() {
   } = usarAutenticacion()
 
   const navegar = useNavigate()
+
+  const esPaciente =
+    autenticado && usuario?.rol === 'paciente'
+
+  const esAdministrador =
+    autenticado && usuario?.rol === 'administrador'
 
   function salir() {
     cerrarSesion()
@@ -58,13 +63,19 @@ function Navbar() {
               Categorías
             </Nav.Link>
 
-            {autenticado && usuario?.rol === 'paciente' && (
-              <Nav.Link as={Link} to="/nueva-cita">
-                Agendar cita
-              </Nav.Link>
+            {esPaciente && (
+              <>
+                <Nav.Link as={Link} to="/nueva-cita">
+                  Agendar cita
+                </Nav.Link>
+
+                <Nav.Link as={Link} to="/mis-citas">
+                  Mis citas
+                </Nav.Link>
+              </>
             )}
 
-            {autenticado && usuario?.rol === 'administrador' && (
+            {esAdministrador && (
               <Nav.Link as={Link} to="/admin-servicios">
                 Administrar servicios
               </Nav.Link>

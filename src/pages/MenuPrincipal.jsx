@@ -1,15 +1,14 @@
-
-import {
+﻿import {
   Container,
   Row,
   Col,
-  Card,
   Button,
   Badge
 } from 'react-bootstrap'
 
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { usarAutenticacion } from '../context/AutenticacionContext'
+import TarjetaMenu from '../components/molecules/TarjetaMenu'
 
 function MenuPrincipal() {
   const { usuario, cerrarSesion } = usarAutenticacion()
@@ -52,109 +51,60 @@ function MenuPrincipal() {
 
       <Row className="g-4 justify-content-center">
 
-        <Col md={6} lg={4}>
-          <Card className="h-100 shadow-sm text-center">
-            <Card.Body className="p-4">
-
-              <div className="fs-1 mb-3">🥗</div>
-
-              <Card.Title>
-                Catálogo de servicios
-              </Card.Title>
-
-              <Card.Text>
-                Conoce nuestras consultas y programas nutricionales.
-              </Card.Text>
-
-              <Button
-                as={Link}
-                to="/catalogo"
-                variant="success"
-              >
-                Ver servicios
-              </Button>
-
-            </Card.Body>
-          </Card>
+        <Col md={6} lg={esPaciente ? 6 : 4}>
+          <TarjetaMenu
+            icono="🥗"
+            titulo="Catálogo de servicios"
+            descripcion="Conoce nuestras consultas y programas nutricionales."
+            textoBoton="Ver servicios"
+            ruta="/catalogo"
+          />
         </Col>
 
-        <Col md={6} lg={4}>
-          <Card className="h-100 shadow-sm text-center">
-            <Card.Body className="p-4">
-
-              <div className="fs-1 mb-3">📋</div>
-
-              <Card.Title>Categorías</Card.Title>
-
-              <Card.Text>
-                Encuentra los servicios según el tipo de atención.
-              </Card.Text>
-
-              <Button
-                as={Link}
-                to="/categorias"
-                variant="success"
-              >
-                Ver categorías
-              </Button>
-
-            </Card.Body>
-          </Card>
+        <Col md={6} lg={esPaciente ? 6 : 4}>
+          <TarjetaMenu
+            icono="📋"
+            titulo="Categorías"
+            descripcion="Encuentra los servicios según el tipo de atención."
+            textoBoton="Ver categorías"
+            ruta="/categorias"
+          />
         </Col>
 
         {esPaciente && (
-          <Col md={6} lg={4}>
-            <Card className="h-100 shadow-sm text-center">
-              <Card.Body className="p-4">
+          <>
+            <Col md={6}>
+              <TarjetaMenu
+                icono="📅"
+                titulo="Agendar una cita"
+                descripcion="Reserva una atención nutricional de forma sencilla."
+                textoBoton="Agendar ahora"
+                ruta="/nueva-cita"
+              />
+            </Col>
 
-                <div className="fs-1 mb-3">📅</div>
-
-                <Card.Title>
-                  Agendar una cita
-                </Card.Title>
-
-                <Card.Text>
-                  Reserva una atención nutricional de forma sencilla.
-                </Card.Text>
-
-                <Button
-                  as={Link}
-                  to="/nueva-cita"
-                  variant="success"
-                >
-                  Agendar ahora
-                </Button>
-
-              </Card.Body>
-            </Card>
-          </Col>
+            <Col md={6}>
+              <TarjetaMenu
+                icono="🗓️"
+                titulo="Mis citas"
+                descripcion="Consulta el historial de tus reservas nutricionales."
+                textoBoton="Ver mis citas"
+                ruta="/mis-citas"
+              />
+            </Col>
+          </>
         )}
 
         {esAdministrador && (
           <Col md={6} lg={4}>
-            <Card className="h-100 shadow-sm text-center">
-              <Card.Body className="p-4">
-
-                <div className="fs-1 mb-3">⚙️</div>
-
-                <Card.Title>
-                  Administrar servicios
-                </Card.Title>
-
-                <Card.Text>
-                  Agrega, edita o elimina servicios nutricionales.
-                </Card.Text>
-
-                <Button
-                  as={Link}
-                  to="/admin-servicios"
-                  variant="dark"
-                >
-                  Administrar
-                </Button>
-
-              </Card.Body>
-            </Card>
+            <TarjetaMenu
+              icono="⚙️"
+              titulo="Administrar servicios"
+              descripcion="Agrega, edita o elimina servicios nutricionales."
+              textoBoton="Administrar"
+              ruta="/admin-servicios"
+              variante="dark"
+            />
           </Col>
         )}
 

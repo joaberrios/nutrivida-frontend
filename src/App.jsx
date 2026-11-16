@@ -1,5 +1,4 @@
-
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
+﻿import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { CatalogoProvider } from './context/CatalogoContext'
 import RutaProtegida from './components/templates/RutaProtegida'
 
@@ -15,14 +14,13 @@ import ConfirmarCita from './pages/ConfirmarCita'
 import CitaExitosa from './pages/CitaExitosa'
 import CitaError from './pages/CitaError'
 import AdminServicios from './pages/AdminServicios'
+import MisCitas from './pages/MisCitas'
 
 function App() {
   return (
     <Routes>
-
       {/* Rutas públicas */}
       <Route path="/" element={<Navigate to="/login" replace />} />
-
       <Route path="/login" element={<Login />} />
       <Route path="/registro" element={<Registro />} />
       <Route path="/inicio" element={<Inicio />} />
@@ -50,12 +48,15 @@ function App() {
       </Route>
 
       {/* Rutas exclusivas para pacientes */}
-      <Route
-        element={<RutaProtegida roles={['paciente']} />}
-      >
+      <Route element={<RutaProtegida roles={['paciente']} />}>
+
         <Route
           path="/nueva-cita"
-          element={<AgendarCita />}
+          element={
+            <CatalogoProvider>
+              <AgendarCita />
+            </CatalogoProvider>
+          }
         />
 
         <Route
@@ -72,27 +73,29 @@ function App() {
           path="/cita-error"
           element={<CitaError />}
         />
+
+        <Route
+          path="/mis-citas"
+          element={<MisCitas />}
+        />
       </Route>
 
       {/* Rutas exclusivas para administradores */}
-      <Route
-        element={<RutaProtegida roles={['administrador']} />}
-      >
-      <Route
-         path="/admin-servicios"
-         element={
-         <CatalogoProvider>
-         <AdminServicios />
-         </CatalogoProvider>
-  }
-/>
+      <Route element={<RutaProtegida roles={['administrador']} />}>
+        <Route
+          path="/admin-servicios"
+          element={
+            <CatalogoProvider>
+              <AdminServicios />
+            </CatalogoProvider>
+          }
+        />
       </Route>
 
       <Route
         path="*"
         element={<Navigate to="/login" replace />}
       />
-
     </Routes>
   )
 }
