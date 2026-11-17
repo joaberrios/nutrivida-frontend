@@ -1,12 +1,29 @@
-
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
-import { ServiciosContext } from '../context/ServiciosContext'
+import { MemoryRouter } from 'react-router-dom'
+
+import { CatalogoContext } from '../context/CatalogoContext'
+import { AutenticacionContext } from '../context/AutenticacionContext'
+
+import {
+  crearServicioApi,
+  actualizarServicioApi,
+  eliminarServicioApi
+} from '../services/serviciosService'
+
 import AdminServicios from './AdminServicios'
 
-const agregarServicio = vi.fn()
-const editarServicio = vi.fn()
-const borrarServicio = vi.fn()
+// Simular las operaciones de la API REST
+vi.mock('../services/serviciosService', () => ({
+  listarServiciosApi: vi.fn(),
+  crearServicioApi: vi.fn(),
+  actualizarServicioApi: vi.fn(),
+  eliminarServicioApi: vi.fn()
+}))
+
+const recargarCatalogo = vi.fn()
+const cerrarSesion = vi.fn()
+const tokenPrueba = 'token-ficticio-administrador'
 
 const servicioExistente = {
   codigo: 'NUT001',
@@ -16,59 +33,87 @@ const servicioExistente = {
   modalidad: 'Presencial',
   profesional: 'Nutricionista 1',
   precio: 25000,
-  descripcion: 'Evaluación nutricional'
+  descripcion: 'Evaluacion nutricional'
 }
 
-describe('Administración de servicios de NutriVida', () => {
+// Preparar los contextos utilizados por la pagina
+function mostrarAdministrador(servicios = [servicioExistente]) {
+  const resultado = render(
+    <MemoryRouter>
+      <AutenticacionContext.Provider
+        value={{
+          token: tokenPrueba,
+          usuario: {
+            id: 1,
+            nombre: 'Administrador',
+            rol: 'administrador'
+          },
+          autenticado: true,
+          cerrarSesion
+        }}
+      >
+        <CatalogoContext.Provider
+          value={{
+            servicios,
+            cargando: false,
+            error: '',
+            recargarCatalogo
+          }}
+        >
+          <AdminServicios />
+        </CatalogoContext.Provider>
+      </AutenticacionContext.Provider>
+    </MemoryRouter>
+  )
+
+  return resultado.container
+}
+
+// Completar el formulario con datos ficticios
+function completarFormulario(contenedor, datos = {}) {
+  const valores = {
+    codigo: 'NUT002',
+    tipo: 'Consulta',
+    nombre: 'Control nutricional',
+    duracion: '30 minutos',
+    modalidad: 'Presencial',
+    profesional: 'Nutricionista 2',
+    precio: '18000',
+    descripcion: 'Control de alimentacion',
+    ...datos
+  }
+
+  Object.entries(valores).forEach(([campo, valor]) => {
+    const control = contenedor.querySelector(`[name="${campo}"]`)
+
+    fireEvent.change(control, {
+      target: { value: valor }
+    })
+  })
+}
+
+describe('Administracion de servicios de NutriVida', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
+    vi.resetAllMocks()
 
     vi.stubGlobal('scrollTo', vi.fn())
     vi.stubGlobal('confirm', vi.fn(() => true))
+
+    crearServicioApi.mockResolvedValue({
+      mensaje: 'Servicio creado'
+    })
+
+    actualizarServicioApi.mockResolvedValue({
+      mensaje: 'Servicio actualizado'
+    })
+
+    eliminarServicioApi.mockResolvedValue(null)
   })
 
   afterEach(() => {
     cleanup()
     vi.unstubAllGlobals()
   })
-
-  function mostrarAdministrador(servicios = [servicioExistente]) {
-    const resultado = render(
-      <ServiciosContext.Provider
-        value={{
-          servicios,
-          agregarServicio,
-          editarServicio,
-          borrarServicio
-        }}
-      >
-        <AdminServicios />
-      </ServiciosContext.Provider>
-    )
-
-    return resultado.container
-  }
-
-  function completarFormulario(container, datos = {}) {
-    const valores = {
-      codigo: 'NUT002',
-      tipo: 'Consulta',
-      nombre: 'Control nutricional',
-      duracion: '30 minutos',
-      profesional: 'Nutricionista 2',
-      precio: '18000',
-      descripcion: 'Control de alimentación',
-      ...datos
-    }
-
-    Object.entries(valores).forEach(([campo, valor]) => {
-      const control = container.querySelector(`[name="${campo}"]`)
-
-      fireEvent.change(control, {
-        target: { value: valor }
-      })
-    })
-  }
 
   it('muestra los servicios registrados', () => {
     mostrarAdministrador()
@@ -78,165 +123,230 @@ describe('Administración de servicios de NutriVida', () => {
     ).toBeInTheDocument()
 
     expect(
-      screen.getByRole('heading', { name: 'Servicios registrados' })
+      screen.getByRole('heading', {
+        name: 'Servicios registrados'
+      })
     ).toBeInTheDocument()
   })
 
-  it('rechaza un formulario con campos vacíos', () => {
+  it('rechaza un formulario con campos vacios', () => {
     mostrarAdministrador()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Agregar servicio' })
+      screen.getByRole('button', {
+        name: 'Agregar servicio'
+      })
     )
 
     expect(
       screen.getByText('Debes completar todos los campos.')
     ).toBeInTheDocument()
 
-    expect(agregarServicio).not.toHaveBeenCalled()
+    expect(crearServicioApi).not.toHaveBeenCalled()
   })
 
   it('rechaza un precio igual a cero', () => {
-    const container = mostrarAdministrador()
+    const contenedor = mostrarAdministrador()
 
-    completarFormulario(container, { precio: '0' })
-
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Agregar servicio' })
-    )
-
-    expect(
-      screen.getByText('El precio debe ser mayor que cero.')
-    ).toBeInTheDocument()
-
-    expect(agregarServicio).not.toHaveBeenCalled()
-  })
-
-  it('impide agregar un servicio con código duplicado', () => {
-    const container = mostrarAdministrador()
-
-    completarFormulario(container, { codigo: 'NUT001' })
+    completarFormulario(contenedor, { precio: '0' })
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Agregar servicio' })
-    )
-
-    expect(
-      screen.getByText(/Ya existe un servicio con ese/i)
-    ).toBeInTheDocument()
-
-    expect(agregarServicio).not.toHaveBeenCalled()
-  })
-
-  it('agrega correctamente un servicio nuevo', () => {
-    const container = mostrarAdministrador()
-
-    completarFormulario(container)
-
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Agregar servicio' })
-    )
-
-    expect(agregarServicio).toHaveBeenCalledWith(
-      expect.objectContaining({
-        codigo: 'NUT002',
-        nombre: 'Control nutricional',
-        precio: 18000,
-        modalidad: 'Presencial'
+      screen.getByRole('button', {
+        name: 'Agregar servicio'
       })
     )
 
     expect(
-      screen.getByText('Servicio agregado correctamente.')
+      screen.getByText(/entero mayor que cero/)
     ).toBeInTheDocument()
+
+    expect(crearServicioApi).not.toHaveBeenCalled()
   })
 
-  it('permite editar un servicio existente', () => {
-    const container = mostrarAdministrador()
-
-    const fila = screen.getByText('Consulta nutricional').closest('tr')
-
-    fireEvent.click(
-      within(fila).getByRole('button', { name: 'Editar' })
+  it('muestra el rechazo de un codigo duplicado desde la API', async () => {
+    const error = Object.assign(
+      new Error('Ya existe un servicio con ese codigo.'),
+      { estado: 409 }
     )
 
-    expect(
-      screen.getByRole('heading', { name: 'Editar servicio' })
-    ).toBeInTheDocument()
+    crearServicioApi.mockRejectedValueOnce(error)
 
-    expect(
-      container.querySelector('[name="codigo"]')
-    ).toBeDisabled()
+    const contenedor = mostrarAdministrador()
 
-    fireEvent.change(container.querySelector('[name="nombre"]'), {
-      target: { value: 'Consulta nutricional actualizada' }
+    completarFormulario(contenedor, {
+      codigo: 'NUT001'
     })
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Guardar cambios' })
-    )
-
-    expect(editarServicio).toHaveBeenCalledWith(
-      'NUT001',
-      expect.objectContaining({
-        codigo: 'NUT001',
-        nombre: 'Consulta nutricional actualizada',
-        precio: 25000
+      screen.getByRole('button', {
+        name: 'Agregar servicio'
       })
     )
 
     expect(
-      screen.getByText('Servicio actualizado correctamente.')
+      await screen.findByText(/Ya existe un servicio con ese/)
     ).toBeInTheDocument()
+
+    expect(crearServicioApi).toHaveBeenCalledWith(
+      expect.objectContaining({
+        codigo: 'NUT001'
+      }),
+      tokenPrueba
+    )
+
+    expect(recargarCatalogo).not.toHaveBeenCalled()
   })
 
-  it('permite cancelar la edición', () => {
-    const container = mostrarAdministrador()
+  it('agrega correctamente un servicio nuevo', async () => {
+    const contenedor = mostrarAdministrador()
+
+    completarFormulario(contenedor)
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Editar' })
-    )
-
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Cancelar' })
+      screen.getByRole('button', {
+        name: 'Agregar servicio'
+      })
     )
 
     expect(
-      screen.getByRole('heading', { name: 'Agregar servicio' })
+      await screen.findByText('Servicio agregado correctamente.')
+    ).toBeInTheDocument()
+
+    expect(crearServicioApi).toHaveBeenCalledWith(
+      {
+        codigo: 'NUT002',
+        tipo: 'Consulta',
+        nombre: 'Control nutricional',
+        duracion: '30 minutos',
+        modalidad: 'Presencial',
+        profesional: 'Nutricionista 2',
+        precio: 18000,
+        descripcion: 'Control de alimentacion'
+      },
+      tokenPrueba
+    )
+
+    expect(recargarCatalogo).toHaveBeenCalledTimes(1)
+  })
+
+  it('permite editar un servicio existente', async () => {
+    const contenedor = mostrarAdministrador()
+
+    const fila = screen
+      .getByText('Consulta nutricional')
+      .closest('tr')
+
+    fireEvent.click(
+      within(fila).getByRole('button', {
+        name: 'Editar'
+      })
+    )
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'Editar servicio'
+      })
     ).toBeInTheDocument()
 
     expect(
-      container.querySelector('[name="codigo"]')
+      contenedor.querySelector('[name="codigo"]')
+    ).toBeDisabled()
+
+    fireEvent.change(
+      contenedor.querySelector('[name="nombre"]'),
+      {
+        target: {
+          value: 'Consulta nutricional actualizada'
+        }
+      }
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Guardar cambios'
+      })
+    )
+
+    expect(
+      await screen.findByText('Servicio actualizado correctamente.')
+    ).toBeInTheDocument()
+
+    expect(actualizarServicioApi).toHaveBeenCalledWith(
+      'NUT001',
+      {
+        ...servicioExistente,
+        nombre: 'Consulta nutricional actualizada'
+      },
+      tokenPrueba
+    )
+
+    expect(recargarCatalogo).toHaveBeenCalledTimes(1)
+  })
+
+  it('permite cancelar la edicion', () => {
+    const contenedor = mostrarAdministrador()
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Editar'
+      })
+    )
+
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Cancelar'
+      })
+    )
+
+    expect(
+      screen.getByRole('heading', {
+        name: 'Agregar servicio'
+      })
+    ).toBeInTheDocument()
+
+    expect(
+      contenedor.querySelector('[name="codigo"]')
     ).not.toBeDisabled()
 
-    expect(editarServicio).not.toHaveBeenCalled()
+    expect(actualizarServicioApi).not.toHaveBeenCalled()
   })
 
-  it('elimina un servicio cuando se confirma', () => {
+  it('elimina un servicio cuando se confirma', async () => {
     mostrarAdministrador()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Eliminar' })
+      screen.getByRole('button', {
+        name: 'Eliminar'
+      })
     )
-
-    expect(window.confirm).toHaveBeenCalled()
-
-    expect(borrarServicio).toHaveBeenCalledWith('NUT001')
 
     expect(
-      screen.getByText('Servicio eliminado correctamente.')
+      await screen.findByText('Servicio eliminado correctamente.')
     ).toBeInTheDocument()
+
+    expect(window.confirm).toHaveBeenCalledTimes(1)
+
+    expect(eliminarServicioApi).toHaveBeenCalledWith(
+      'NUT001',
+      tokenPrueba
+    )
+
+    expect(recargarCatalogo).toHaveBeenCalledTimes(1)
   })
 
-  it('no elimina un servicio cuando se cancela la confirmación', () => {
-    vi.stubGlobal('confirm', vi.fn(() => false))
+  it('no elimina un servicio cuando se cancela la confirmacion', () => {
+    window.confirm.mockReturnValue(false)
 
     mostrarAdministrador()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Eliminar' })
+      screen.getByRole('button', {
+        name: 'Eliminar'
+      })
     )
 
-    expect(borrarServicio).not.toHaveBeenCalled()
+    expect(window.confirm).toHaveBeenCalledTimes(1)
+    expect(eliminarServicioApi).not.toHaveBeenCalled()
+    expect(recargarCatalogo).not.toHaveBeenCalled()
   })
 })

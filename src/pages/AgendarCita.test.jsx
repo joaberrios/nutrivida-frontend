@@ -1,40 +1,102 @@
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { ServiciosContext } from '../context/ServiciosContext'
+import { CatalogoContext } from '../context/CatalogoContext'
 import AgendarCita from './AgendarCita'
 
-const navegar = vi.fn()
+const { navegar } = vi.hoisted(() => ({ navegar: vi.fn() }))
 
 vi.mock('react-router-dom', async () => {
   const original = await vi.importActual('react-router-dom')
-
-  return {
-    ...original,
-    useNavigate: () => navegar
-  }
+  return { ...original, useNavigate: () => navegar }
 })
 
 vi.mock('../components/templates/PlantillaPublica', () => ({
   default: ({ children }) => <div>{children}</div>
 }))
 
+// Simular la carga de profesionales sin acceder a la base de datos real.
+vi.mock('../hooks/usarNutricionistas', () => ({
+  usarNutricionistas: () => ({
+    nutricionistas: [
+      { id: 1, nombre: 'Nutricionista 1' },
+      { id: 2, nombre: 'Nutricionista 2' }
+    ],
+    cargando: false,
+    error: '',
+    recargarNutricionistas: vi.fn()
+  })
+}))
+
 const serviciosPrueba = [
   {
-    codigo: 'NUT001',
+    codigo: 'CN001',
     nombre: 'Consulta nutricional',
-    precio: 25000
+    tipo: 'Consulta',
+    duracion: '50 min',
+    modalidad: 'Presencial',
+    profesional: 'Nutricionista',
+    precio: 35000,
+    descripcion: 'Consulta de prueba'
   }
 ]
 
+function mostrarFormulario() {
+  const resultado = render(
+    <MemoryRouter>
+      <CatalogoContext.Provider
+        value={{
+          servicios: serviciosPrueba,
+          cargando: false,
+          error: '',
+          recargarCatalogo: vi.fn()
+        }}
+      >
+        <AgendarCita />
+      </CatalogoContext.Provider>
+    </MemoryRouter>
+  )
+
+  const controles = Array.from(resultado.container.querySelectorAll('select'))
+  const servicio = controles.find(control =>
+    Array.from(control.options).some(opcion => opcion.value === 'CN001')
+  )
+  const nutricionista = controles.find(control =>
+    Array.from(control.options).some(opcion => opcion.textContent.trim() === 'Nutricionista 1')
+  )
+  const hora = controles.find(control => control !== servicio && control !== nutricionista)
+
+  return {
+    servicio,
+    nutricionista,
+    hora,
+    fecha: resultado.container.querySelector('input[type="date"]')
+  }
+}
+
+function seleccionarFecha(campos, fecha) {
+  fireEvent.change(campos.servicio, { target: { value: 'CN001' } })
+  fireEvent.change(campos.nutricionista, { target: { value: '1' } })
+  fireEvent.change(campos.fecha, { target: { value: fecha } })
+}
+
+function obtenerHoras(control) {
+  return within(control)
+    .queryAllByRole('option')
+    .map(opcion => opcion.value)
+    .filter(valor => /^\d{2}:\d{2}$/.test(valor))
+}
+
+function botonContinuar() {
+  return screen.getByRole('button', { name: /Continuar a confirmaci/i })
+}
+
 describe('Agendamiento de citas de NutriVida', () => {
   beforeEach(() => {
-    navegar.mockClear()
-    vi.useFakeTimers({
-      toFake: ['Date']
-    })
-    vi.setSystemTime(new Date(2026, 9, 20, 10, 0, 0))
+    vi.clearAllMocks()
+    vi.useFakeTimers({ toFake: ['Date'] })
+    // Fecha fija para que las pruebas no dependan del reloj del equipo.
+    vi.setSystemTime(new Date('2026-10-20T13:00:00Z'))
   })
 
   afterEach(() => {
@@ -42,143 +104,90 @@ describe('Agendamiento de citas de NutriVida', () => {
     vi.useRealTimers()
   })
 
-  function mostrarFormulario() {
-    const resultado = render(
-      <MemoryRouter>
-        <ServiciosContext.Provider value={{ servicios: serviciosPrueba }}>
-          <AgendarCita />
-        </ServiciosContext.Provider>
-      </MemoryRouter>
-    )
-
-    const controles = resultado.container.querySelectorAll('select')
-    const fecha = resultado.container.querySelector('input[type="date"]')
-
-    return {
-      servicio: controles[0],
-      nutricionista: controles[1],
-      fecha,
-      hora: controles[2]
-    }
-  }
-
-  function completarDatos(campos, fecha = '2026-10-21', hora = '10:00') {
-    fireEvent.change(campos.servicio, {
-      target: { value: 'NUT001' }
-    })
-
-    fireEvent.change(campos.nutricionista, {
-      target: { value: 'Nutricionista 1' }
-    })
-
-    fireEvent.change(campos.fecha, {
-      target: { value: fecha }
-    })
-
-    if (hora) {
-      fireEvent.change(campos.hora, {
-        target: { value: hora }
-      })
-    }
-  }
-
   it('muestra el formulario para agendar citas', () => {
     const campos = mostrarFormulario()
 
-    expect(
-      screen.getByRole('heading', { name: 'Agendar cita nutricional' })
-    ).toBeInTheDocument()
-
+    expect(screen.getByRole('heading', {
+      name: 'Agendar cita nutricional'
+    })).toBeInTheDocument()
     expect(campos.servicio).toBeInTheDocument()
     expect(campos.nutricionista).toBeInTheDocument()
     expect(campos.fecha).toBeInTheDocument()
     expect(campos.hora).toBeDisabled()
-  })
-
-  it('muestra los horarios de lunes a jueves', () => {
-    const campos = mostrarFormulario()
-
-    fireEvent.change(campos.fecha, {
-      target: { value: '2026-10-21' }
-    })
-
-    const opciones = within(campos.hora).getAllByRole('option')
-
-    expect(opciones).toHaveLength(17)
-    expect(within(campos.hora).getByRole('option', {
-      name: '09:00'
-    })).toBeInTheDocument()
-
-    expect(within(campos.hora).getByRole('option', {
-      name: '16:30'
+    expect(botonContinuar()).toBeDisabled()
+    expect(within(campos.nutricionista).getByRole('option', {
+      name: 'Nutricionista 1'
     })).toBeInTheDocument()
   })
 
-  it('limita los horarios de los viernes hasta las 12:30', () => {
+  it('muestra los horarios de lunes a jueves respetando la duración', () => {
     const campos = mostrarFormulario()
 
-    fireEvent.change(campos.fecha, {
-      target: { value: '2026-10-23' }
-    })
+    for (const fecha of ['2026-10-26', '2026-10-27', '2026-10-28', '2026-10-29']) {
+      seleccionarFecha(campos, fecha)
+      const horas = obtenerHoras(campos.hora)
+      expect(horas).toHaveLength(15)
+      expect(horas[0]).toBe('09:00')
+      expect(horas.at(-1)).toBe('16:00')
+      expect(horas).not.toContain('16:30')
+      expect(horas).not.toContain('17:00')
+    }
+  })
 
-    expect(within(campos.hora).getAllByRole('option')).toHaveLength(9)
+  it('limita los horarios de los viernes según la duración', () => {
+    const campos = mostrarFormulario()
+    seleccionarFecha(campos, '2026-10-23')
 
-    expect(within(campos.hora).getByRole('option', {
-      name: '12:30'
-    })).toBeInTheDocument()
-
-    expect(within(campos.hora).queryByRole('option', {
-      name: '13:00'
-    })).not.toBeInTheDocument()
+    const horas = obtenerHoras(campos.hora)
+    expect(horas).toHaveLength(7)
+    expect(horas[0]).toBe('09:00')
+    expect(horas.at(-1)).toBe('12:00')
+    expect(horas).not.toContain('12:30')
+    expect(horas).not.toContain('13:00')
   })
 
   it('rechaza fechas anteriores al día actual', () => {
     const campos = mostrarFormulario()
+    seleccionarFecha(campos, '2026-10-19')
 
-    fireEvent.change(campos.fecha, {
-      target: { value: '2026-10-19' }
-    })
-
-    expect(
-      screen.getByText('No puedes reservar en fechas pasadas.')
-    ).toBeInTheDocument()
-
+    expect(obtenerHoras(campos.hora)).toHaveLength(0)
     expect(campos.hora).toBeDisabled()
+    expect(botonContinuar()).toBeDisabled()
+    fireEvent.click(botonContinuar())
+    expect(navegar).not.toHaveBeenCalled()
   })
 
   it('impide agendar citas los fines de semana', () => {
     const campos = mostrarFormulario()
 
-    fireEvent.change(campos.fecha, {
-      target: { value: '2026-10-24' }
-    })
-
-    expect(campos.hora).toBeDisabled()
-
-    expect(
-      screen.getByText(/Elige una fecha de lunes a viernes/i)
-    ).toBeInTheDocument()
+    for (const fecha of ['2026-10-24', '2026-10-25']) {
+      seleccionarFecha(campos, fecha)
+      expect(obtenerHoras(campos.hora)).toHaveLength(0)
+      expect(campos.hora).toBeDisabled()
+      expect(botonContinuar()).toBeDisabled()
+      fireEvent.click(botonContinuar())
+      expect(navegar).not.toHaveBeenCalled()
+    }
   })
 
   it('permite continuar con una cita válida', () => {
     const campos = mostrarFormulario()
+    seleccionarFecha(campos, '2026-10-21')
+    fireEvent.change(campos.hora, { target: { value: '10:00' } })
 
-    completarDatos(campos)
+    expect(botonContinuar()).toBeEnabled()
+    fireEvent.click(botonContinuar())
 
-    fireEvent.click(
-      screen.getByRole('button', {
-        name: /Continuar a confirmaci/i
-      })
-    )
-
+    expect(navegar).toHaveBeenCalledTimes(1)
     expect(navegar).toHaveBeenCalledWith('/confirmar-cita', {
-      state: {
+      state: expect.objectContaining({
         servicio: 'Consulta nutricional',
-        codigoServicio: 'NUT001',
+        codigoServicio: 'CN001',
         nutricionista: 'Nutricionista 1',
         fecha: '2026-10-21',
         hora: '10:00'
-      }
+      })
     })
+    expect(Number(navegar.mock.calls[0][1].state.nutricionistaId)).toBe(1)
   })
 })
