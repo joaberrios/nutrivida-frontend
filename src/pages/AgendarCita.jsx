@@ -11,7 +11,7 @@ import {
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 import FormularioAgendamiento from '../components/organisms/FormularioAgendamiento'
 import { CatalogoContext } from '../context/CatalogoContext'
-import { usarNutricionistas } from '../hooks/usarNutricionistas'
+import { useNutricionistas } from '../hooks/useNutricionistas'
 
 function AgendarCita() {
   const navegar = useNavigate()
@@ -28,7 +28,7 @@ function AgendarCita() {
     cargando: cargandoNutricionistas,
     error: errorNutricionistas,
     recargarNutricionistas
-  } = usarNutricionistas()
+  } = useNutricionistas()
 
   const cargando = cargandoServicios || cargandoNutricionistas
   const error = errorServicios || errorNutricionistas
@@ -108,3 +108,4 @@ function AgendarCita() {
 }
 
 export default AgendarCita
+

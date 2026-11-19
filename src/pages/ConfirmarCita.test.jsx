@@ -24,14 +24,14 @@ import {
 
 import ConfirmarCita from './ConfirmarCita'
 import { crearReserva } from '../services/reservasService'
-import { usarAutenticacion } from '../context/AutenticacionContext'
+import { useAutenticacion } from '../hooks/useAutenticacion'
 
 vi.mock('../services/reservasService', () => ({
   crearReserva: vi.fn()
 }))
 
-vi.mock('../context/AutenticacionContext', () => ({
-  usarAutenticacion: vi.fn()
+vi.mock('../hooks/useAutenticacion', () => ({
+  useAutenticacion: vi.fn()
 }))
 
 vi.mock('../components/templates/PlantillaPublica', () => ({
@@ -107,7 +107,7 @@ describe('Confirmación de citas', () => {
   beforeEach(() => {
     vi.resetAllMocks()
 
-    usarAutenticacion.mockReturnValue({
+    useAutenticacion.mockReturnValue({
       token: 'token-de-prueba',
       cerrarSesion
     })
@@ -232,3 +232,5 @@ describe('Confirmación de citas', () => {
     ).toBeTruthy()
   })
 })
+
+

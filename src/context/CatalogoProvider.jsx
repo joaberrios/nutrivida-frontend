@@ -1,8 +1,9 @@
 ﻿import { useEffect, useState } from 'react'
-import { listarNutricionistas } from '../services/nutricionistasService'
+import { CatalogoContext } from './CatalogoContext'
+import { listarServiciosApi } from '../services/serviciosService'
 
-export function usarNutricionistas() {
-  const [nutricionistas, setNutricionistas] = useState([])
+export function CatalogoProvider({ children }) {
+  const [servicios, setServicios] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState('')
   const [intento, setIntento] = useState(0)
@@ -10,25 +11,25 @@ export function usarNutricionistas() {
   useEffect(() => {
     const controlador = new AbortController()
 
-    async function cargarNutricionistas() {
+    async function cargarServicios() {
       setCargando(true)
       setError('')
 
       try {
-        const datos = await listarNutricionistas(
+        const datos = await listarServiciosApi(
           controlador.signal
         )
 
         if (!Array.isArray(datos)) {
-          throw new Error('Los datos recibidos no son válidos.')
+          throw new Error('El catálogo recibido no es válido.')
         }
 
         if (!controlador.signal.aborted) {
-          setNutricionistas(datos)
+          setServicios(datos)
         }
       } catch (error) {
         if (!controlador.signal.aborted) {
-          setNutricionistas([])
+          setServicios([])
           setError(error.message)
         }
       } finally {
@@ -38,19 +39,26 @@ export function usarNutricionistas() {
       }
     }
 
-    cargarNutricionistas()
+    cargarServicios()
 
     return () => controlador.abort()
   }, [intento])
 
-  function recargarNutricionistas() {
+  function recargarCatalogo() {
     setIntento((anterior) => anterior + 1)
   }
 
-  return {
-    nutricionistas,
-    cargando,
-    error,
-    recargarNutricionistas
-  }
+  return (
+    <CatalogoContext.Provider
+      value={{
+        servicios,
+        cargando,
+        error,
+        recargarCatalogo
+      }}
+    >
+      {children}
+    </CatalogoContext.Provider>
+  )
 }
+

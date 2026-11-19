@@ -1,10 +1,8 @@
-
-import { StrictMode } from 'react'
+﻿import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { BrowserRouter } from 'react-router-dom'
 
-import { ServiciosProvider } from './context/ServiciosContext'
-import { AutenticacionProvider } from './context/AutenticacionContext'
+import { AutenticacionProvider } from './context/AutenticacionProvider'
 
 import 'bootstrap/dist/css/bootstrap.min.css'
 import './index.css'
@@ -14,10 +12,9 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <BrowserRouter>
       <AutenticacionProvider>
-        <ServiciosProvider>
-          <App />
-        </ServiciosProvider>
+        <App />
       </AutenticacionProvider>
     </BrowserRouter>
   </StrictMode>
 )
+

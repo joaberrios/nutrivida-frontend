@@ -1,11 +1,11 @@
-
+﻿
 import { useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import Form from 'react-bootstrap/Form'
 
 import CampoFormulario from '../molecules/CampoFormulario'
 import BotonLogin from '../atoms/BotonLogin'
-import { usarAutenticacion } from '../../context/AutenticacionContext'
+import { useAutenticacion } from '../../hooks/useAutenticacion'
 
 const dominiosPermitidos = [
   '@duocuc.cl',
@@ -24,7 +24,7 @@ function FormularioLogin() {
   const {
     iniciarSesion,
     sesionVencida
-  } = usarAutenticacion()
+  } = useAutenticacion()
 
   async function enviarFormulario(evento) {
     evento.preventDefault()
@@ -154,4 +154,6 @@ function FormularioLogin() {
 }
 
 export default FormularioLogin
+
+
 

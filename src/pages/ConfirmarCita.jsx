@@ -3,14 +3,14 @@ import { Container, Card, Button, Spinner } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
 
 import PlantillaPublica from '../components/templates/PlantillaPublica'
-import { usarAutenticacion } from '../context/AutenticacionContext'
+import { useAutenticacion } from '../hooks/useAutenticacion'
 import { crearReserva } from '../services/reservasService'
 
 function ConfirmarCita() {
   const ubicacion = useLocation()
   const navegar = useNavigate()
 
-  const { token, cerrarSesion } = usarAutenticacion()
+  const { token, cerrarSesion } = useAutenticacion()
 
   const [guardando, setGuardando] = useState(false)
   const solicitudEnCurso = useRef(false)
@@ -138,3 +138,5 @@ function ConfirmarCita() {
 }
 
 export default ConfirmarCita
+
+

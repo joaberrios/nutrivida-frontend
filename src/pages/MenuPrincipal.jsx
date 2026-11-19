@@ -7,11 +7,11 @@
 } from 'react-bootstrap'
 
 import { useNavigate } from 'react-router-dom'
-import { usarAutenticacion } from '../context/AutenticacionContext'
+import { useAutenticacion } from '../hooks/useAutenticacion'
 import TarjetaMenu from '../components/molecules/TarjetaMenu'
 
 function MenuPrincipal() {
-  const { usuario, cerrarSesion } = usarAutenticacion()
+  const { usuario, cerrarSesion } = useAutenticacion()
   const navegar = useNavigate()
 
   const esAdministrador =
@@ -124,3 +124,5 @@ function MenuPrincipal() {
 }
 
 export default MenuPrincipal
+
+

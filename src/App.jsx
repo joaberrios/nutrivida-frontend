@@ -1,5 +1,5 @@
 ﻿import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
-import { CatalogoProvider } from './context/CatalogoContext'
+import { CatalogoProvider } from './context/CatalogoProvider'
 import RutaProtegida from './components/templates/RutaProtegida'
 
 import Login from './pages/Login'
@@ -101,3 +101,4 @@ function App() {
 }
 
 export default App
+

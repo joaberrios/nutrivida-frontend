@@ -1,7 +1,7 @@
 ﻿import { useEffect, useState } from 'react'
 import { listarReservas } from '../services/reservasService'
 
-export function usarReservas(token) {
+export function useReservas(token) {
   const [reservas, setReservas] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -61,3 +61,4 @@ export function usarReservas(token) {
     recargarReservas
   }
 }
+

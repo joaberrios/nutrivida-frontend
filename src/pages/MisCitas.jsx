@@ -10,8 +10,8 @@ import {
 
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 import HistorialReservas from '../components/organisms/HistorialReservas'
-import { usarAutenticacion } from '../context/AutenticacionContext'
-import { usarReservas } from '../hooks/usarReservas'
+import { useAutenticacion } from '../hooks/useAutenticacion'
+import { useReservas } from '../hooks/useReservas'
 
 function MisCitas() {
   const navegar = useNavigate()
@@ -19,14 +19,14 @@ function MisCitas() {
   const {
     token,
     cerrarSesion
-  } = usarAutenticacion()
+  } = useAutenticacion()
 
   const {
     reservas,
     cargando,
     error,
     recargarReservas
-  } = usarReservas(token)
+  } = useReservas(token)
 
   useEffect(() => {
     if (error?.estado === 401) {
@@ -105,3 +105,5 @@ function MisCitas() {
 }
 
 export default MisCitas
+
+

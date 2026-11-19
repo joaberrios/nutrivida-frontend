@@ -1,4 +1,4 @@
-
+﻿
 import {
   afterEach,
   beforeEach,
@@ -17,7 +17,7 @@ import {
 } from '@testing-library/react'
 
 import { MemoryRouter } from 'react-router-dom'
-import { AutenticacionProvider } from '../../context/AutenticacionContext'
+import { AutenticacionProvider } from '../../context/AutenticacionProvider'
 import { iniciarSesion } from '../../services/autenticacionService'
 import FormularioLogin from './FormularioLogin'
 
@@ -233,3 +233,4 @@ describe('Formulario de login de NutriVida', () => {
     ).toBeInTheDocument()
   })
 })
+

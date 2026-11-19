@@ -5,14 +5,14 @@
 } from 'react-bootstrap'
 
 import { Link, useNavigate } from 'react-router-dom'
-import { usarAutenticacion } from '../../context/AutenticacionContext'
+import { useAutenticacion } from '../../hooks/useAutenticacion'
 
 function Navbar() {
   const {
     usuario,
     autenticado,
     cerrarSesion
-  } = usarAutenticacion()
+  } = useAutenticacion()
 
   const navegar = useNavigate()
 
@@ -104,3 +104,5 @@ function Navbar() {
 }
 
 export default Navbar
+
+

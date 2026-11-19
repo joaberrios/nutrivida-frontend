@@ -1,16 +1,6 @@
-
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useState
-} from 'react'
-
-import {
-  iniciarSesion as iniciarSesionApi
-} from '../services/autenticacionService'
-
-export const AutenticacionContext = createContext(null)
+﻿import { useEffect, useState } from 'react'
+import { AutenticacionContext } from './AutenticacionContext'
+import { iniciarSesion as iniciarSesionApi } from '../services/autenticacionService'
 
 export function AutenticacionProvider({ children }) {
   const [sesion, setSesion] = useState(null)
@@ -75,16 +65,4 @@ export function AutenticacionProvider({ children }) {
       {children}
     </AutenticacionContext.Provider>
   )
-}
-
-export function usarAutenticacion() {
-  const contexto = useContext(AutenticacionContext)
-
-  if (!contexto) {
-    throw new Error(
-      'El contexto de autenticación no está disponible.'
-    )
-  }
-
-  return contexto
 }

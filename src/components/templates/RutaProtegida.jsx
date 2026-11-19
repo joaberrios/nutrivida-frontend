@@ -1,10 +1,10 @@
-
+﻿
 import { Navigate, Outlet, Link } from 'react-router-dom'
 import { Container, Alert, Button } from 'react-bootstrap'
-import { usarAutenticacion } from '../../context/AutenticacionContext'
+import { useAutenticacion } from '../../hooks/useAutenticacion'
 
 function RutaProtegida({ roles = [] }) {
-  const { autenticado, usuario } = usarAutenticacion()
+  const { autenticado, usuario } = useAutenticacion()
 
   if (!autenticado) {
     return <Navigate to="/login" replace />
@@ -35,3 +35,5 @@ function RutaProtegida({ roles = [] }) {
 }
 
 export default RutaProtegida
+
+

@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+﻿import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { CatalogoContext } from '../context/CatalogoContext'
@@ -16,8 +16,8 @@ vi.mock('../components/templates/PlantillaPublica', () => ({
 }))
 
 // Simular la carga de profesionales sin acceder a la base de datos real.
-vi.mock('../hooks/usarNutricionistas', () => ({
-  usarNutricionistas: () => ({
+vi.mock('../hooks/useNutricionistas', () => ({
+  useNutricionistas: () => ({
     nutricionistas: [
       { id: 1, nombre: 'Nutricionista 1' },
       { id: 2, nombre: 'Nutricionista 2' }
@@ -191,3 +191,4 @@ describe('Agendamiento de citas de NutriVida', () => {
     expect(Number(navegar.mock.calls[0][1].state.nutricionistaId)).toBe(1)
   })
 })
+
