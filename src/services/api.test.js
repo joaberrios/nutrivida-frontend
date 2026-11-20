@@ -7,9 +7,25 @@
   vi
 } from 'vitest'
 
-describe('Cliente HTTP de NutriVida', () => {
+const {
+  solicitudAxios,
+  crearCliente,
+  esCancelacion
+} = vi.hoisted(() => ({
+  solicitudAxios: vi.fn(),
+  crearCliente: vi.fn(),
+  esCancelacion: vi.fn()
+}))
+
+vi.mock('axios', () => ({
+  default: {
+    create: crearCliente,
+    isCancel: esCancelacion
+  }
+}))
+
+describe('Cliente HTTP de NutriVida mediante Axios', () => {
   let solicitarApi
-  let peticion
 
   beforeEach(async () => {
     vi.resetModules()
@@ -19,25 +35,41 @@ describe('Cliente HTTP de NutriVida', () => {
       'http://localhost:3001/api'
     )
 
-    peticion = vi.fn()
-    vi.stubGlobal('fetch', peticion)
+    solicitudAxios.mockReset()
+    crearCliente.mockReset()
+    esCancelacion.mockReset()
+
+    crearCliente.mockReturnValue({
+      request: solicitudAxios
+    })
+
+    esCancelacion.mockImplementation(
+      error => error?.code === 'ERR_CANCELED'
+    )
 
     const modulo = await import('./api')
     solicitarApi = modulo.solicitarApi
   })
 
   afterEach(() => {
-    vi.unstubAllGlobals()
     vi.unstubAllEnvs()
   })
 
   function simularRespuesta(estado, datos) {
-    peticion.mockResolvedValue({
-      ok: estado >= 200 && estado < 300,
+    solicitudAxios.mockResolvedValue({
       status: estado,
-      json: async () => datos
+      data: datos
     })
   }
+
+  it('configura Axios con la direccion del backend', () => {
+    expect(crearCliente).toHaveBeenCalledWith({
+      baseURL: 'http://localhost:3001/api',
+      headers: {
+        Accept: 'application/json'
+      }
+    })
+  })
 
   it('realiza una consulta GET correctamente', async () => {
     simularRespuesta(200, [])
@@ -46,29 +78,33 @@ describe('Cliente HTTP de NutriVida', () => {
       await solicitarApi('/servicios')
     ).toEqual([])
 
-    expect(peticion).toHaveBeenCalledWith(
-      'http://localhost:3001/api/servicios',
+    expect(solicitudAxios).toHaveBeenCalledWith(
       expect.objectContaining({
+        url: '/servicios',
         method: 'GET'
       })
     )
   })
 
-  it('envia los datos en formato JSON', async () => {
-    const datos = { codigo_servicio: 'CN001' }
+  it('envia los datos mediante POST', async () => {
+    const datos = {
+      codigo_servicio: 'CN001'
+    }
 
-    simularRespuesta(201, { mensaje: 'Reserva creada' })
+    simularRespuesta(201, {
+      mensaje: 'Reserva creada'
+    })
 
     await solicitarApi('/reservas', {
       metodo: 'POST',
       datos
     })
 
-    expect(peticion).toHaveBeenCalledWith(
-      'http://localhost:3001/api/reservas',
+    expect(solicitudAxios).toHaveBeenCalledWith(
       expect.objectContaining({
+        url: '/reservas',
         method: 'POST',
-        body: JSON.stringify(datos),
+        data: datos,
         headers: expect.objectContaining({
           'Content-Type': 'application/json'
         })
@@ -83,8 +119,7 @@ describe('Cliente HTTP de NutriVida', () => {
       token: 'token-ficticio'
     })
 
-    expect(peticion).toHaveBeenCalledWith(
-      'http://localhost:3001/api/reservas',
+    expect(solicitudAxios).toHaveBeenCalledWith(
       expect.objectContaining({
         headers: expect.objectContaining({
           Authorization: 'Bearer token-ficticio'
@@ -100,16 +135,24 @@ describe('Cliente HTTP de NutriVida', () => {
     [409, 'Horario ocupado'],
     [429, 'Demasiados intentos'],
     [500, 'Error interno']
-  ])('maneja correctamente el error HTTP %s', async (estado, mensaje) => {
-    simularRespuesta(estado, { mensaje })
+  ])(
+    'maneja correctamente el error HTTP %s',
+    async (estado, mensaje) => {
+      solicitudAxios.mockRejectedValue({
+        response: {
+          status: estado,
+          data: { mensaje }
+        }
+      })
 
-    await expect(
-      solicitarApi('/reservas')
-    ).rejects.toMatchObject({
-      estado,
-      message: mensaje
-    })
-  })
+      await expect(
+        solicitarApi('/reservas')
+      ).rejects.toMatchObject({
+        estado,
+        message: mensaje
+      })
+    }
+  )
 
   it('maneja una respuesta sin contenido', async () => {
     simularRespuesta(204, null)
@@ -122,9 +165,9 @@ describe('Cliente HTTP de NutriVida', () => {
   })
 
   it('informa cuando no hay conexion con el servidor', async () => {
-    peticion.mockRejectedValue(
-      new TypeError('Failed to fetch')
-    )
+    solicitudAxios.mockRejectedValue({
+      request: {}
+    })
 
     await expect(
       solicitarApi('/servicios')
@@ -133,14 +176,8 @@ describe('Cliente HTTP de NutriVida', () => {
     )
   })
 
-  it('rechaza respuestas con JSON invalido', async () => {
-    peticion.mockResolvedValue({
-      ok: true,
-      status: 200,
-      json: async () => {
-        throw new SyntaxError('JSON invalido')
-      }
-    })
+  it('rechaza respuestas sin datos validos', async () => {
+    simularRespuesta(200, null)
 
     await expect(
       solicitarApi('/servicios')
@@ -150,25 +187,24 @@ describe('Cliente HTTP de NutriVida', () => {
   })
 
   it('permite cancelar una solicitud', async () => {
-    const controlador = new AbortController()
-    const error = new DOMException(
-      'Solicitud cancelada',
-      'AbortError'
-    )
+    const error = new Error('Solicitud cancelada')
+    error.name = 'CanceledError'
+    error.code = 'ERR_CANCELED'
 
+    const controlador = new AbortController()
     controlador.abort()
-    peticion.mockRejectedValue(error)
+
+    solicitudAxios.mockRejectedValue(error)
 
     await expect(
       solicitarApi('/servicios', {
         senal: controlador.signal
       })
     ).rejects.toMatchObject({
-      name: 'AbortError'
+      code: 'ERR_CANCELED'
     })
 
-    expect(peticion).toHaveBeenCalledWith(
-      'http://localhost:3001/api/servicios',
+    expect(solicitudAxios).toHaveBeenCalledWith(
       expect.objectContaining({
         signal: controlador.signal
       })
@@ -187,6 +223,6 @@ describe('Cliente HTTP de NutriVida', () => {
       'La direccion de la API no esta configurada.'
     )
 
-    expect(peticion).not.toHaveBeenCalled()
+    expect(solicitudAxios).not.toHaveBeenCalled()
   })
 })

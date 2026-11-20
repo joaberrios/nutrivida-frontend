@@ -1,4 +1,5 @@
 ﻿import { solicitarApi } from './api'
+import { crearServicioDTO } from '../dto/servicio.dto'
 
 // Consultar el catalogo de servicios.
 export async function listarServiciosApi(senal) {
@@ -12,7 +13,7 @@ export async function listarServiciosApi(senal) {
 export async function crearServicioApi(datos, token) {
   return solicitarApi('/servicios', {
     metodo: 'POST',
-    datos,
+    datos: crearServicioDTO(datos),
     token
   })
 }
@@ -23,7 +24,7 @@ export async function actualizarServicioApi(codigo, datos, token) {
     `/servicios/${encodeURIComponent(codigo)}`,
     {
       metodo: 'PUT',
-      datos,
+      datos: crearServicioDTO(datos),
       token
     }
   )

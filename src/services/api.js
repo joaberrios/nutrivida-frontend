@@ -1,6 +1,16 @@
+﻿import axios from 'axios'
 
 const DIRECCION_API = import.meta.env.VITE_API_URL
 
+// Crear una instancia centralizada para comunicarse con el backend.
+const clienteApi = axios.create({
+  baseURL: DIRECCION_API,
+  headers: {
+    Accept: 'application/json'
+  }
+})
+
+// Realizar solicitudes HTTP utilizando Axios.
 export async function solicitarApi(
   ruta,
   {
@@ -14,9 +24,7 @@ export async function solicitarApi(
     throw new Error('La direccion de la API no esta configurada.')
   }
 
-  const encabezados = {
-    Accept: 'application/json'
-  }
+  const encabezados = {}
 
   if (datos !== undefined) {
     encabezados['Content-Type'] = 'application/json'
@@ -26,49 +34,62 @@ export async function solicitarApi(
     encabezados.Authorization = `Bearer ${token}`
   }
 
-  let respuesta
-
   try {
-    respuesta = await fetch(
-      `${DIRECCION_API}${ruta}`,
-      {
-        method: metodo,
-        headers: encabezados,
-        body: datos !== undefined
-          ? JSON.stringify(datos)
-          : undefined,
-        signal: senal
-      }
-    )
+    const respuesta = await clienteApi.request({
+      url: ruta,
+      method: metodo,
+      data: datos,
+      headers: encabezados,
+      signal: senal
+    })
+
+    if (respuesta.status === 204) {
+      return null
+    }
+
+    if (
+      respuesta.data === null ||
+      respuesta.data === undefined ||
+      respuesta.data === ''
+    ) {
+      throw new Error(
+        'El servidor devolvio una respuesta no valida.'
+      )
+    }
+
+    return respuesta.data
+
   } catch (error) {
-    if (error.name === 'AbortError') {
+    // Mantener el comportamiento de las solicitudes canceladas.
+    if (
+      axios.isCancel(error) ||
+      error?.code === 'ERR_CANCELED' ||
+      error?.name === 'AbortError'
+    ) {
       throw error
     }
 
-    throw new Error(
-      'No se pudo conectar con el servidor.'
-    )
-  }
+    // Gestionar los errores HTTP recibidos desde el backend.
+    if (error?.response) {
+      const resultado = error.response.data
 
-  if (respuesta.status === 204) {
-    return null
-  }
+      const errorApi = new Error(
+        resultado?.mensaje ||
+        'Ocurrio un error en la solicitud.'
+      )
 
-  const resultado = await respuesta.json().catch(() => null)
+      errorApi.estado = error.response.status
 
-  if (!respuesta.ok) {
-    const error = new Error(
-      resultado?.mensaje || 'Ocurrio un error en la solicitud.'
-    )
+      throw errorApi
+    }
 
-    error.estado = respuesta.status
+    // Gestionar problemas de conexion.
+    if (error?.request) {
+      throw new Error(
+        'No se pudo conectar con el servidor.'
+      )
+    }
 
     throw error
   }
-
-  if (resultado === null) {
-    throw new Error('El servidor devolvio una respuesta no valida.')
-  }
-
-  return resultado
 }
