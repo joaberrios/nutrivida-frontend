@@ -1,4 +1,4 @@
-﻿# NutriVida - Frontend
+# NutriVida - Frontend
 
 ## 1. Identificacion del proyecto
 
@@ -211,12 +211,12 @@ Ejecutar las pruebas con cobertura:
 
     npm run test:coverage
 
-Resultados del 19 de noviembre de 2026:
+Cobertura verificada el 19/11/2026; 107 pruebas verificadas el 20/11/2026:
 
 | Indicador | Resultado |
 |---|---|
-| Archivos de pruebas | 18 de 18 |
-| Casos aprobados | 97 de 97 |
+| Archivos de pruebas | 21 de 21 |
+| Casos aprobados | 107 de 107 |
 | Casos fallidos | 0 |
 | Cobertura de lineas | 75.38% |
 | Cobertura de sentencias | 74.81% |
@@ -266,7 +266,7 @@ los riesgos de seguridad.
 La integracion principal con el backend se encuentra
 implementada.
 
-El frontend cuenta con 97 casos de pruebas aprobados.
+El frontend cuenta con 107 casos de pruebas aprobados.
 El backend cuenta con 71 casos aprobados y 11
 endpoints documentados mediante OpenAPI.
 
@@ -283,9 +283,9 @@ se encuentran detalladas en la planificacion del backend.
 
 ## 12. Documentacion
 
-- Diagrama entidad-relacion: pendiente de enlace.
-- Diagrama de arquitectura: pendiente de enlace.
-- Diagrama de secuencia JWT: pendiente de enlace.
+- Diagrama entidad-relacion: [archivo editable](https://github.com/dasrojas-cpu/nutrivida-backend/blob/main/docs/guia19/diagramas/01_Modelo_ER.drawio).
+- Diagrama de arquitectura: [archivo editable](https://github.com/dasrojas-cpu/nutrivida-backend/blob/main/docs/guia19/diagramas/02_Arquitectura.drawio).
+- Diagrama de secuencia JWT: [archivo editable](https://github.com/dasrojas-cpu/nutrivida-backend/blob/main/docs/guia19/diagramas/03_Secuencia_JWT.drawio).
 
 Swagger mediante el tunel SSH:
 
