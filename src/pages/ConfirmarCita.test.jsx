@@ -1,149 +1,236 @@
+﻿import {
+  describe,
+  it,
+  expect,
+  vi,
+  beforeEach,
+  afterEach
+} from 'vitest'
 
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+  cleanup
+} from '@testing-library/react'
+
+import {
+  MemoryRouter,
+  Routes,
+  Route,
+  useLocation
+} from 'react-router-dom'
+
 import ConfirmarCita from './ConfirmarCita'
-import { guardarCita } from '../services/citasService'
+import { crearReserva } from '../services/reservasService'
+import { useAutenticacion } from '../hooks/useAutenticacion'
 
-const navegar = vi.fn()
+vi.mock('../services/reservasService', () => ({
+  crearReserva: vi.fn()
+}))
 
-let datosReserva = null
-
-vi.mock('react-router-dom', async () => {
-  const original = await vi.importActual('react-router-dom')
-
-  return {
-    ...original,
-    useNavigate: () => navegar,
-    useLocation: () => ({ state: datosReserva })
-  }
-})
+vi.mock('../hooks/useAutenticacion', () => ({
+  useAutenticacion: vi.fn()
+}))
 
 vi.mock('../components/templates/PlantillaPublica', () => ({
-  default: ({ children }) => <div>{children}</div>
+  default: ({ children }) => children
 }))
 
-vi.mock('../services/citasService', () => ({
-  guardarCita: vi.fn()
-}))
+const cerrarSesion = vi.fn()
 
 const citaEjemplo = {
-  servicio: 'Consulta nutricional',
-  codigoServicio: 'NUT001',
-  nutricionista: 'Nutricionista 1',
-  fecha: '2026-11-10',
-  hora: '10:00'
+  servicio: 'Primera consulta nutricional',
+  codigoServicio: 'CN001',
+  nutricionista: 'Nutricionista 2',
+  nutricionistaId: 2,
+  fecha: '2026-11-24',
+  hora: '11:00'
 }
 
-describe('Confirmación de citas de NutriVida', () => {
+function ResultadoExitoso() {
+  const ubicacion = useLocation()
+
+  return (
+    <p>Reserva registrada: {ubicacion.state?.cita?.id}</p>
+  )
+}
+
+function ResultadoError() {
+  const ubicacion = useLocation()
+
+  return <p>{ubicacion.state?.mensaje}</p>
+}
+
+function renderizarPagina(datos = citaEjemplo) {
+  return render(
+    <MemoryRouter
+      initialEntries={[
+        {
+          pathname: '/confirmar-cita',
+          state: datos
+        }
+      ]}
+    >
+      <Routes>
+        <Route
+          path="/confirmar-cita"
+          element={<ConfirmarCita />}
+        />
+
+        <Route
+          path="/cita-exitosa"
+          element={<ResultadoExitoso />}
+        />
+
+        <Route
+          path="/cita-error"
+          element={<ResultadoError />}
+        />
+
+        <Route
+          path="/login"
+          element={<p>Iniciar sesión</p>}
+        />
+
+        <Route
+          path="/nueva-cita"
+          element={<p>Nueva cita</p>}
+        />
+      </Routes>
+    </MemoryRouter>
+  )
+}
+
+describe('Confirmación de citas', () => {
   beforeEach(() => {
-    vi.clearAllMocks()
-    datosReserva = { ...citaEjemplo }
+    vi.resetAllMocks()
+
+    useAutenticacion.mockReturnValue({
+      token: 'token-de-prueba',
+      cerrarSesion
+    })
   })
 
   afterEach(() => {
     cleanup()
   })
 
-  function mostrarConfirmacion() {
-    render(
-      <MemoryRouter>
-        <ConfirmarCita />
-      </MemoryRouter>
-    )
-  }
-
-  it('muestra los datos de la reserva', () => {
-    mostrarConfirmacion()
+  it('muestra el resumen de la cita', () => {
+    renderizarPagina()
 
     expect(
-      screen.getByRole('heading', { name: 'Confirmar cita' })
-    ).toBeInTheDocument()
+      screen.getByText('Servicio: Primera consulta nutricional')
+    ).toBeTruthy()
 
     expect(
-      screen.getByText('Consulta nutricional')
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText('Nutricionista 1')
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText('2026-11-10')
-    ).toBeInTheDocument()
-
-    expect(
-      screen.getByText('10:00')
-    ).toBeInTheDocument()
+      screen.getByText('Nutricionista: Nutricionista 2')
+    ).toBeTruthy()
   })
 
-  it('confirma correctamente una cita válida', () => {
-    const citaGuardada = {
-      ...citaEjemplo,
-      id: 'cita-123',
-      estado: 'Confirmada'
-    }
+  it('confirma la reserva mediante la API y JWT', async () => {
+    crearReserva.mockResolvedValue({ id: 9 })
 
-    guardarCita.mockReturnValue(citaGuardada)
-
-    mostrarConfirmacion()
+    renderizarPagina()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Confirmar cita' })
+      screen.getByRole('button', {
+        name: 'Confirmar cita'
+      })
     )
 
-    expect(guardarCita).toHaveBeenCalledWith(citaEjemplo)
+    expect(
+      await screen.findByText('Reserva registrada: 9')
+    ).toBeTruthy()
 
-    expect(navegar).toHaveBeenCalledWith('/cita-exitosa', {
-      replace: true,
-      state: { cita: citaGuardada }
-    })
+    expect(crearReserva).toHaveBeenCalledWith(
+      citaEjemplo,
+      'token-de-prueba'
+    )
   })
 
-  it('muestra el error cuando la cita ya está ocupada', () => {
-    guardarCita.mockImplementation(() => {
-      throw new Error('Este nutricionista ya tiene una cita en la fecha y hora seleccionadas.')
-    })
+  it('muestra un error cuando el horario está ocupado', async () => {
+    const error = new Error('Horario ocupado')
+    error.estado = 409
 
-    mostrarConfirmacion()
+    crearReserva.mockRejectedValue(error)
+
+    renderizarPagina()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Confirmar cita' })
+      screen.getByRole('button', {
+        name: 'Confirmar cita'
+      })
     )
 
-    expect(navegar).toHaveBeenCalledWith('/cita-error', {
-      replace: true,
-      state: {
-        mensaje: 'Este nutricionista ya tiene una cita en la fecha y hora seleccionadas.'
-      }
-    })
+    expect(
+      await screen.findByText('Horario ocupado')
+    ).toBeTruthy()
   })
 
-  it('permite volver a agendar una cita', () => {
-    mostrarConfirmacion()
+  it('cierra la sesión cuando el JWT no es válido', async () => {
+    const error = new Error('Sesion vencida')
+    error.estado = 401
+
+    crearReserva.mockRejectedValue(error)
+
+    renderizarPagina()
 
     fireEvent.click(
-      screen.getByRole('button', { name: 'Volver' })
+      screen.getByRole('button', {
+        name: 'Confirmar cita'
+      })
     )
 
-    expect(navegar).toHaveBeenCalledWith('/nueva-cita')
+    expect(
+      await screen.findByText('Iniciar sesión')
+    ).toBeTruthy()
+
+    expect(cerrarSesion).toHaveBeenCalled()
   })
 
-  it('muestra un aviso cuando no existen datos de reserva', () => {
-    datosReserva = null
-
-    mostrarConfirmacion()
+  it('impide confirmar una reserva sin datos', () => {
+    renderizarPagina(null)
 
     expect(
       screen.getByText('No hay datos de una cita')
-    ).toBeInTheDocument()
+    ).toBeTruthy()
 
-    fireEvent.click(
-      screen.getByRole('button', { name: 'Volver a agendar' })
+    expect(crearReserva).not.toHaveBeenCalled()
+  })
+
+  it('deshabilita el botón mientras guarda la reserva', async () => {
+    let resolverReserva
+
+    crearReserva.mockImplementation(
+      () => new Promise((resolver) => {
+        resolverReserva = resolver
+      })
     )
 
-    expect(navegar).toHaveBeenCalledWith('/nueva-cita')
+    renderizarPagina()
 
-    expect(guardarCita).not.toHaveBeenCalled()
+    fireEvent.click(
+      screen.getByRole('button', {
+        name: 'Confirmar cita'
+      })
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('button', {
+          name: /Guardando reserva/
+        }).disabled
+      ).toBe(true)
+    })
+
+    resolverReserva({ id: 9 })
+
+    expect(
+      await screen.findByText('Reserva registrada: 9')
+    ).toBeTruthy()
   })
 })
+
+

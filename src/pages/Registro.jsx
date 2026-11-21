@@ -1,16 +1,21 @@
-import { useState } from 'react'
+
+import { useEffect, useState } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { Container, Card, Form, Button, Alert } from 'react-bootstrap'
+import {
+  Container,
+  Card,
+  Form,
+  Button,
+  Alert,
+  Spinner
+} from 'react-bootstrap'
+
+import { registrarPaciente } from '../services/autenticacionService'
 
 const dominiosPermitidos = [
   '@duocuc.cl',
   '@gmail.com',
   '@profesorduoc.cl'
-]
-
-const cuentasExistentes = [
-  'joa.berrios@duocuc.cl',
-  'das.rojas@duocuc.cl'
 ]
 
 function Registro() {
@@ -26,9 +31,20 @@ function Registro() {
 
   const [error, setError] = useState('')
   const [mensaje, setMensaje] = useState('')
+  const [cargando, setCargando] = useState(false)
 
-  function cambiarCampo(event) {
-    const { name, value } = event.target
+  useEffect(() => {
+    if (!mensaje) return
+
+    const temporizador = setTimeout(() => {
+      navigate('/login')
+    }, 1500)
+
+    return () => clearTimeout(temporizador)
+  }, [mensaje, navigate])
+
+  function cambiarCampo(evento) {
+    const { name, value } = evento.target
 
     setFormulario((anterior) => ({
       ...anterior,
@@ -39,8 +55,12 @@ function Registro() {
     setMensaje('')
   }
 
-  function registrarUsuario(event) {
-    event.preventDefault()
+  async function registrarUsuario(evento) {
+    evento.preventDefault()
+
+    if (cargando || mensaje) return
+
+    setError('')
 
     const nombre = formulario.nombre.trim()
     const apellido = formulario.apellido.trim()
@@ -66,8 +86,8 @@ function Registro() {
       return
     }
 
-    const dominioValido = dominiosPermitidos.some((dominio) =>
-      correo.endsWith(dominio)
+    const dominioValido = dominiosPermitidos.some(
+      (dominio) => correo.endsWith(dominio)
     )
 
     if (!dominioValido) {
@@ -77,8 +97,22 @@ function Registro() {
       return
     }
 
-    if (contrasena.length < 4) {
-      setError('La contraseña debe tener al menos 4 caracteres.')
+    if (
+      nombre.length > 100 ||
+      apellido.length > 100 ||
+      correo.length > 255
+    ) {
+      setError('Los datos ingresados son demasiado largos.')
+      return
+    }
+
+    if (
+      contrasena.length < 15 ||
+      contrasena.length > 128
+    ) {
+      setError(
+        'La contraseña debe tener entre 15 y 128 caracteres.'
+      )
       return
     }
 
@@ -87,44 +121,44 @@ function Registro() {
       return
     }
 
+    setCargando(true)
+
     try {
-      const usuariosGuardados = JSON.parse(
-        localStorage.getItem('nutrivida_usuarios') || '[]'
-      )
-
-      if (!Array.isArray(usuariosGuardados)) {
-        throw new Error('Los datos de usuarios no son válidos.')
-      }
-
-      const existeCuenta =
-        cuentasExistentes.includes(correo) ||
-        usuariosGuardados.some((usuario) => usuario.correo === correo)
-
-      if (existeCuenta) {
-        setError('Ya existe una cuenta con ese correo electrónico.')
-        return
-      }
-
-      const nuevoUsuario = {
+      await registrarPaciente({
         nombre,
         apellido,
         correo,
         contrasena
-      }
+      })
 
-      localStorage.setItem(
-        'nutrivida_usuarios',
-        JSON.stringify([...usuariosGuardados, nuevoUsuario])
+      setFormulario({
+        nombre: '',
+        apellido: '',
+        correo: '',
+        contrasena: '',
+        confirmarContrasena: ''
+      })
+
+      setMensaje(
+        'Cuenta creada correctamente. Ya puedes iniciar sesión.'
       )
 
-      setMensaje('Cuenta creada correctamente. Ya puedes iniciar sesión.')
-      setError('')
-
-      setTimeout(() => {
-        navigate('/login')
-      }, 1500)
-    } catch {
-      setError('No se pudo guardar la cuenta. Inténtalo nuevamente.')
+    } catch (error) {
+      if (error.estado === 409) {
+        setError(
+          'Ya existe una cuenta con ese correo electrónico.'
+        )
+      } else if (error.estado === 429) {
+        setError(
+          'Demasiados intentos. Inténtalo más tarde.'
+        )
+      } else {
+        setError(
+          error.message || 'No se pudo registrar la cuenta.'
+        )
+      }
+    } finally {
+      setCargando(false)
     }
   }
 
@@ -135,76 +169,118 @@ function Registro() {
         style={{ maxWidth: '500px' }}
       >
         <Card.Body className="p-4">
+
           <h2 className="text-center text-success mb-4">
             Crear cuenta
           </h2>
 
-          {error && <Alert variant="danger">{error}</Alert>}
-          {mensaje && <Alert variant="success">{mensaje}</Alert>}
+          {error && (
+            <Alert variant="danger">{error}</Alert>
+          )}
+
+          {mensaje && (
+            <Alert variant="success">{mensaje}</Alert>
+          )}
 
           <Form onSubmit={registrarUsuario} noValidate>
-            <Form.Group className="mb-3">
-              <Form.Label>Nombre</Form.Label>
-              <Form.Control
-                type="text"
-                name="nombre"
-                value={formulario.nombre}
-                onChange={cambiarCampo}
-                placeholder="Ingresa tu nombre"
-              />
-            </Form.Group>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Apellido</Form.Label>
-              <Form.Control
-                type="text"
-                name="apellido"
-                value={formulario.apellido}
-                onChange={cambiarCampo}
-                placeholder="Ingresa tu apellido"
-              />
-            </Form.Group>
+            <fieldset disabled={cargando || Boolean(mensaje)}>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Correo electrónico</Form.Label>
-              <Form.Control
-                type="email"
-                name="correo"
-                value={formulario.correo}
-                onChange={cambiarCampo}
-                placeholder="Ingresa tu correo"
-              />
-            </Form.Group>
+              <Form.Group className="mb-3" controlId="nombre">
+                <Form.Label>Nombre</Form.Label>
 
-            <Form.Group className="mb-3">
-              <Form.Label>Contraseña</Form.Label>
-              <Form.Control
-                type="password"
-                name="contrasena"
-                value={formulario.contrasena}
-                onChange={cambiarCampo}
-                placeholder="Crea una contraseña"
-              />
-            </Form.Group>
+                <Form.Control
+                  type="text"
+                  name="nombre"
+                  value={formulario.nombre}
+                  onChange={cambiarCampo}
+                  placeholder="Ingresa tu nombre"
+                  autoComplete="given-name"
+                />
+              </Form.Group>
 
-            <Form.Group className="mb-4">
-              <Form.Label>Confirmar contraseña</Form.Label>
-              <Form.Control
-                type="password"
-                name="confirmarContrasena"
-                value={formulario.confirmarContrasena}
-                onChange={cambiarCampo}
-                placeholder="Repite tu contraseña"
-              />
-            </Form.Group>
+              <Form.Group className="mb-3" controlId="apellido">
+                <Form.Label>Apellido</Form.Label>
 
-            <Button
-              type="submit"
-              variant="success"
-              className="w-100"
-            >
-              Registrarse
-            </Button>
+                <Form.Control
+                  type="text"
+                  name="apellido"
+                  value={formulario.apellido}
+                  onChange={cambiarCampo}
+                  placeholder="Ingresa tu apellido"
+                  autoComplete="family-name"
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="correo">
+                <Form.Label>Correo electrónico</Form.Label>
+
+                <Form.Control
+                  type="email"
+                  name="correo"
+                  value={formulario.correo}
+                  onChange={cambiarCampo}
+                  placeholder="Ingresa tu correo"
+                  autoComplete="email"
+                />
+              </Form.Group>
+
+              <Form.Group className="mb-3" controlId="contrasena">
+                <Form.Label>Contraseña</Form.Label>
+
+                <Form.Control
+                  type="password"
+                  name="contrasena"
+                  value={formulario.contrasena}
+                  onChange={cambiarCampo}
+                  placeholder="Crea una contraseña"
+                  autoComplete="new-password"
+                />
+
+                <Form.Text className="text-muted">
+                  Debe tener al menos 15 caracteres.
+                </Form.Text>
+              </Form.Group>
+
+              <Form.Group
+                className="mb-4"
+                controlId="confirmarContrasena"
+              >
+                <Form.Label>
+                  Confirmar contraseña
+                </Form.Label>
+
+                <Form.Control
+                  type="password"
+                  name="confirmarContrasena"
+                  value={formulario.confirmarContrasena}
+                  onChange={cambiarCampo}
+                  placeholder="Repite tu contraseña"
+                  autoComplete="new-password"
+                />
+              </Form.Group>
+
+              <Button
+                type="submit"
+                variant="success"
+                className="w-100"
+              >
+                {cargando ? (
+                  <>
+                    <Spinner
+                      animation="border"
+                      size="sm"
+                      className="me-2"
+                    />
+                    Registrando...
+                  </>
+                ) : (
+                  'Registrarse'
+                )}
+              </Button>
+
+            </fieldset>
+
           </Form>
 
           <p className="text-center mt-3 mb-0">
@@ -213,6 +289,7 @@ function Registro() {
               Iniciar sesión
             </Link>
           </p>
+
         </Card.Body>
       </Card>
     </Container>

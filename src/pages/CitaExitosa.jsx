@@ -1,12 +1,12 @@
-
-import { Container, Card, Button } from 'react-bootstrap'
+﻿import { Container, Card, Button } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
+
 import PlantillaPublica from '../components/templates/PlantillaPublica'
 
 function CitaExitosa() {
-  const navigate = useNavigate()
-  const location = useLocation()
-  const cita = location.state?.cita
+  const navegar = useNavigate()
+  const ubicacion = useLocation()
+  const cita = ubicacion.state?.cita
 
   return (
     <PlantillaPublica>
@@ -19,29 +19,56 @@ function CitaExitosa() {
             {cita ? (
               <>
                 <h1 className="text-success mb-3">
-                  ¡Cita agendada!
+                  Cita agendada correctamente
                 </h1>
 
-                <p>Tu cita fue registrada correctamente.</p>
+                <p>
+                  Tu reserva fue registrada en el sistema.
+                </p>
 
-                <p><strong>Servicio:</strong> {cita.servicio}</p>
-                <p><strong>Nutricionista:</strong> {cita.nutricionista}</p>
-                <p><strong>Fecha:</strong> {cita.fecha}</p>
-                <p><strong>Hora:</strong> {cita.hora}</p>
-                <p><strong>Estado:</strong> {cita.estado}</p>
+                <p>Número de reserva: {cita.id}</p>
+
+                <p>Servicio: {cita.servicio}</p>
+
+                <p>Nutricionista: {cita.nutricionista}</p>
+
+                <p>
+                  Fecha: {String(cita.fecha_reserva).slice(0, 10)}
+                </p>
+
+                <p>
+                  Hora: {String(cita.hora_reserva).slice(0, 5)}
+                </p>
+
+                <p>
+                  Duración: {cita.duracion_minutos} minutos
+                </p>
+
+                <p>
+                  Precio: {
+                    Number(cita.precio).toLocaleString('es-CL', {
+                      style: 'currency',
+                      currency: 'CLP'
+                    })
+                  }
+                </p>
+
+                <p className="text-success">
+                  Estado: {cita.estado}
+                </p>
               </>
             ) : (
               <>
                 <h2>No hay una confirmación disponible</h2>
-                <p>Realiza una reserva para obtener su confirmación.</p>
+                <p>Realiza una reserva para continuar.</p>
               </>
             )}
 
             <Button
               variant="success"
-              onClick={() => navigate('/inicio')}
+              onClick={() => navegar('/menu')}
             >
-              Volver al inicio
+              Volver al menú
             </Button>
           </Card.Body>
         </Card>

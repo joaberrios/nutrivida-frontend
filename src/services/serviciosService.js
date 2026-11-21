@@ -1,59 +1,42 @@
-import serviciosIniciales from '../data/servicios'
+﻿import { solicitarApi } from './api'
+import { crearServicioDTO } from '../dto/servicio.dto'
 
-const CLAVE = 'servicios'
-
-// Carga los datos iniciales si todavía no existen
-function iniciarDatos() {
-  const datos = localStorage.getItem(CLAVE)
-
-  if (!datos) {
-    localStorage.setItem(CLAVE, JSON.stringify(serviciosIniciales))
-  }
+// Consultar el catalogo de servicios.
+export async function listarServiciosApi(senal) {
+  return solicitarApi('/servicios', {
+    metodo: 'GET',
+    senal
+  })
 }
 
-// LISTAR
-export function listarServicios() {
-  iniciarDatos()
-
-  const datos = localStorage.getItem(CLAVE)
-  return JSON.parse(datos)
+// Crear un servicio como administrador.
+export async function crearServicioApi(datos, token) {
+  return solicitarApi('/servicios', {
+    metodo: 'POST',
+    datos: crearServicioDTO(datos),
+    token
+  })
 }
 
-// CREAR
-export function crearServicio(nuevoServicio) {
-  const servicios = listarServicios()
-
-  servicios.push(nuevoServicio)
-
-  localStorage.setItem(CLAVE, JSON.stringify(servicios))
-
-  return nuevoServicio
-}
-
-// ACTUALIZAR
-export function actualizarServicio(codigo, servicioActualizado) {
-  const servicios = listarServicios()
-
-  const nuevosServicios = servicios.map((servicio) =>
-    servicio.codigo === codigo
-      ? { ...servicio, ...servicioActualizado }
-      : servicio
+// Actualizar un servicio existente.
+export async function actualizarServicioApi(codigo, datos, token) {
+  return solicitarApi(
+    `/servicios/${encodeURIComponent(codigo)}`,
+    {
+      metodo: 'PUT',
+      datos: crearServicioDTO(datos),
+      token
+    }
   )
-
-  localStorage.setItem(CLAVE, JSON.stringify(nuevosServicios))
-
-  return nuevosServicios
 }
 
-// ELIMINAR
-export function eliminarServicio(codigo) {
-  const servicios = listarServicios()
-
-  const nuevosServicios = servicios.filter(
-    (servicio) => servicio.codigo !== codigo
+// Eliminar un servicio del catalogo.
+export async function eliminarServicioApi(codigo, token) {
+  return solicitarApi(
+    `/servicios/${encodeURIComponent(codigo)}`,
+    {
+      metodo: 'DELETE',
+      token
+    }
   )
-
-  localStorage.setItem(CLAVE, JSON.stringify(nuevosServicios))
-
-  return nuevosServicios
 }

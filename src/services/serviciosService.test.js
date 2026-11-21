@@ -1,137 +1,145 @@
+﻿import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { describe, test, expect, beforeEach } from 'vitest'
+import { solicitarApi } from './api'
 
 import {
-  listarServicios,
-  crearServicio,
-  actualizarServicio,
-  eliminarServicio
+  listarServiciosApi,
+  crearServicioApi,
+  actualizarServicioApi,
+  eliminarServicioApi
 } from './serviciosService'
 
-describe('serviciosService', () => {
+// Simular la comunicacion con el backend.
+vi.mock('./api', () => ({
+  solicitarApi: vi.fn()
+}))
 
+const tokenPrueba = 'token-ficticio-administrador'
+
+const servicioPrueba = {
+  codigo: 'CN001',
+  tipo: 'Consulta',
+  nombre: 'Consulta nutricional',
+  duracion: '50 min',
+  modalidad: 'Presencial',
+  profesional: 'Nutricionista',
+  precio: 35000,
+  descripcion: 'Servicio de prueba'
+}
+
+describe('Servicios de NutriVida mediante API REST', () => {
   beforeEach(() => {
-    localStorage.clear()
+    vi.resetAllMocks()
   })
 
-  // PRUEBA 1: Crear un servicio
-  test('crea un nuevo servicio', () => {
-    const nuevoServicio = {
-      codigo: 'TEST001',
-      tipo: 'Consulta',
-      nombre: 'Servicio de prueba',
-      duracion: '30 min',
-      modalidad: 'Presencial',
-      profesional: 'Nutricionista',
-      precio: 20000,
-      descripcion: 'Servicio creado para la prueba'
+  it('consulta el catalogo mediante GET', async () => {
+    const controlador = new AbortController()
+
+    solicitarApi.mockResolvedValue([servicioPrueba])
+
+    const resultado = await listarServiciosApi(
+      controlador.signal
+    )
+
+    expect(resultado).toEqual([servicioPrueba])
+
+    expect(solicitarApi).toHaveBeenCalledWith(
+      '/servicios',
+      {
+        metodo: 'GET',
+        senal: controlador.signal
+      }
+    )
+  })
+
+  it('crea un servicio mediante POST y JWT', async () => {
+    solicitarApi.mockResolvedValue(servicioPrueba)
+
+    const resultado = await crearServicioApi(
+      servicioPrueba,
+      tokenPrueba
+    )
+
+    expect(resultado).toEqual(servicioPrueba)
+
+    expect(solicitarApi).toHaveBeenCalledWith(
+      '/servicios',
+      {
+        metodo: 'POST',
+        datos: servicioPrueba,
+        token: tokenPrueba
+      }
+    )
+  })
+
+  it('actualiza un servicio mediante PUT', async () => {
+    const servicioActualizado = {
+      ...servicioPrueba,
+      precio: 40000
     }
 
-    crearServicio(nuevoServicio)
+    solicitarApi.mockResolvedValue(servicioActualizado)
 
-    const servicios = listarServicios()
-
-    const encontrado = servicios.find(
-      (servicio) => servicio.codigo === 'TEST001'
+    const resultado = await actualizarServicioApi(
+      'CN001',
+      servicioActualizado,
+      tokenPrueba
     )
 
-    expect(encontrado).toBeDefined()
-    expect(encontrado.nombre).toBe('Servicio de prueba')
+    expect(resultado).toEqual(servicioActualizado)
+
+    expect(solicitarApi).toHaveBeenCalledWith(
+      '/servicios/CN001',
+      {
+        metodo: 'PUT',
+        datos: servicioActualizado,
+        token: tokenPrueba
+      }
+    )
   })
 
-  // PRUEBA 2: Listar servicios
-  test('carga los servicios iniciales', () => {
-    const servicios = listarServicios()
+  it('elimina un servicio mediante DELETE', async () => {
+    solicitarApi.mockResolvedValue(null)
 
-    expect(Array.isArray(servicios)).toBe(true)
-    expect(servicios.length).toBeGreaterThan(0)
-  })
-
-  // PRUEBA 3: Guardar un servicio
-  test('guarda un servicio en localStorage', () => {
-    const nuevoServicio = {
-      codigo: 'TEST002',
-      nombre: 'Consulta nutricional',
-      precio: 15000
-    }
-
-    crearServicio(nuevoServicio)
-
-    const guardados = JSON.parse(
-      localStorage.getItem('servicios')
+    const resultado = await eliminarServicioApi(
+      'CN001',
+      tokenPrueba
     )
 
-    expect(
-      guardados.some(servicio => servicio.codigo === 'TEST002')
-    ).toBe(true)
-  })
+    expect(resultado).toBeNull()
 
-  // PRUEBA 4: Actualizar un servicio
-  test('actualiza un servicio existente', () => {
-    crearServicio({
-      codigo: 'TEST003',
-      nombre: 'Servicio antiguo',
-      precio: 10000
-    })
-
-    actualizarServicio('TEST003', {
-      nombre: 'Servicio actualizado'
-    })
-
-    const servicios = listarServicios()
-
-    const encontrado = servicios.find(
-      servicio => servicio.codigo === 'TEST003'
+    expect(solicitarApi).toHaveBeenCalledWith(
+      '/servicios/CN001',
+      {
+        metodo: 'DELETE',
+        token: tokenPrueba
+      }
     )
-
-    expect(encontrado.nombre).toBe('Servicio actualizado')
-    expect(encontrado.precio).toBe(10000)
   })
 
-  // PRUEBA 5: Eliminar un servicio
-  test('elimina un servicio existente', () => {
-    crearServicio({
-      codigo: 'TEST004',
-      nombre: 'Servicio para eliminar',
-      precio: 12000
+  it('conserva el error cuando existe un codigo duplicado', async () => {
+    const error = new Error('Codigo duplicado')
+    error.estado = 409
+
+    solicitarApi.mockRejectedValue(error)
+
+    await expect(
+      crearServicioApi(servicioPrueba, tokenPrueba)
+    ).rejects.toMatchObject({
+      estado: 409
     })
-
-    eliminarServicio('TEST004')
-
-    const servicios = listarServicios()
-
-    const encontrado = servicios.find(
-      servicio => servicio.codigo === 'TEST004'
-    )
-
-    expect(encontrado).toBeUndefined()
   })
 
-  // PRUEBA 6: Mantener los demás servicios
-  test('mantiene los otros servicios al eliminar uno', () => {
-    crearServicio({
-      codigo: 'TEST005',
-      nombre: 'Servicio que permanece',
-      precio: 20000
+  it('conserva el rechazo cuando faltan permisos', async () => {
+    const error = new Error('Acceso denegado')
+    error.estado = 403
+
+    solicitarApi.mockRejectedValue(error)
+
+    await expect(
+      eliminarServicioApi('CN001', tokenPrueba)
+    ).rejects.toMatchObject({
+      estado: 403
     })
-
-    crearServicio({
-      codigo: 'TEST006',
-      nombre: 'Servicio que se elimina',
-      precio: 18000
-    })
-
-    eliminarServicio('TEST006')
-
-    const servicios = listarServicios()
-
-    expect(
-      servicios.some(servicio => servicio.codigo === 'TEST005')
-    ).toBe(true)
-
-    expect(
-      servicios.some(servicio => servicio.codigo === 'TEST006')
-    ).toBe(false)
   })
-
 })

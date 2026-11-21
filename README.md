@@ -1,172 +1,295 @@
-# NutriVida
+# NutriVida - Frontend
 
-NutriVida es una aplicación web desarrollada con React para la gestión de servicios nutricionales y el agendamiento de citas.
+## 1. Identificacion del proyecto
 
-El proyecto permite consultar servicios, revisar categorías, registrar usuarios, iniciar sesión, agendar citas y administrar los servicios disponibles.
+- Asignatura: Desarrollo Fullstack II - DSY1104.
+- Proyecto: NutriVida.
+- Entrega: Guia 19.
+- Seccion: pendiente de completar.
+- Integrantes: pendiente de completar.
 
-## Tecnologías utilizadas
+NutriVida es una aplicacion web que permite consultar
+servicios nutricionales, registrar usuarios, iniciar
+sesion y reservar horas de atencion.
 
-- React
-- Vite
-- JavaScript
-- Bootstrap
-- React Bootstrap
-- React Router DOM
-- Context API
-- Vitest
-- React Testing Library
-- Git y GitHub
+Tambien permite consultar las reservas realizadas y
+administrar los servicios nutricionales.
 
-## Funcionalidades principales
+## 2. Repositorios
 
-### Inicio de sesión y registro
-
-El sistema permite iniciar sesión con cuentas existentes y registrar nuevos usuarios.
-
-Los formularios incluyen validaciones para comprobar los datos ingresados y mostrar mensajes cuando existe algún error.
-
-### Catálogo de servicios
-
-Los usuarios pueden consultar los servicios nutricionales disponibles, buscar servicios, revisar categorías y acceder al detalle de cada servicio.
-
-### Agendamiento de citas
-
-El sistema permite seleccionar un servicio, nutricionista, fecha y horario.
-
-Antes de confirmar la reserva, se muestra un resumen con los datos seleccionados.
-
-El sistema también contempla una página de confirmación exitosa y otra para informar errores durante el agendamiento.
-
-### Administración de servicios
-
-El módulo de administración permite:
-
-- Agregar nuevos servicios.
-- Consultar los servicios registrados.
-- Editar servicios existentes.
-- Eliminar servicios.
-- Validar campos obligatorios, precios y códigos duplicados.
-
-### Almacenamiento de datos
-
-El proyecto utiliza `localStorage` para guardar información de usuarios registrados, servicios y citas en el navegador.
-
-Este almacenamiento corresponde a una implementación académica y no reemplaza una base de datos ni un sistema de autenticación seguro para producción.
-
-## Arquitectura del proyecto
-
-El proyecto utiliza una organización basada en Atomic Design:
-
-- **Atoms:** componentes básicos reutilizables.
-- **Molecules:** combinaciones de componentes pequeños.
-- **Organisms:** componentes de mayor complejidad.
-- **Templates:** estructuras reutilizables de páginas.
-- **Pages:** páginas principales de la aplicación.
-
-Además, incluye carpetas para servicios, contexto y datos.
-
-## Instalación
-
-Clonar el repositorio:
-
-```bash
-git clone https://github.com/joaberrios/nutrivida-frontend.git
-```
-
-Ingresar a la carpeta:
-
-```bash
-cd nutrivida-frontend
-```
-
-Instalar las dependencias:
-
-```bash
-npm install
-```
-
-## Ejecutar el proyecto
-
-Iniciar el servidor de desarrollo:
-
-```bash
-npm run dev
-```
-
-Abrir en el navegador la dirección indicada por Vite, normalmente:
-
-http://localhost:5173/
-
-En Windows PowerShell, si existe una restricción para ejecutar scripts, se pueden utilizar los comandos `npm.cmd` y `npx.cmd`.
-
-## Pruebas automáticas
-
-El proyecto utiliza Vitest y React Testing Library para comprobar el funcionamiento de sus componentes y funcionalidades.
-
-Ejecutar todas las pruebas:
-
-```bash
-npx vitest run
-```
-
-Resultado de la última ejecución verificada:
-
-- **57 pruebas aprobadas.**
-- **14 archivos de pruebas aprobados.**
-- **0 pruebas fallidas.**
-
-Entre las funcionalidades probadas se encuentran el inicio de sesión, registro, agendamiento de citas, confirmación de reservas, administración de servicios, contexto y almacenamiento de datos.
-
-## Cobertura de pruebas
-
-Para generar el informe de cobertura:
-
-```bash
-npx vitest run --coverage
-```
-
-Resultados de la última ejecución verificada:
-
-| Indicador | Cobertura |
-|---|---:|
-| Sentencias | 81,49 % |
-| Ramas | 87,58 % |
-| Funciones | 71,73 % |
-| Líneas | 81,34 % |
-
-El informe HTML de cobertura se genera en la carpeta `coverage`.
-
-## Control de versiones
-
-El proyecto utiliza Git y GitHub para el control de versiones y el trabajo colaborativo.
-
-Repositorio:
-
+Frontend:
 https://github.com/joaberrios/nutrivida-frontend
 
-## Integrantes
+Backend:
+https://github.com/dasrojas-cpu/nutrivida-backend
 
-- Joaquín
-- Dastin
+Ambos proyectos se encuentran separados y se comunican
+mediante una API REST.
 
-## Contexto académico
+## 3. Tecnologias utilizadas
 
-Proyecto desarrollado como parte de una evaluación académica de desarrollo web con React.
+| Tecnologia | Version utilizada o declarada |
+|---|---|
+| Node.js | 24.21.0 |
+| npm | 11.19.0 |
+| React | 19.2.8 |
+| React Bootstrap | 2.10.10 |
+| Bootstrap | 5.3.8 |
+| React Router | 7.18.4 |
+| Vite | 8.3.5 |
+| Vitest | 5.0.3 |
+| Oxlint | 1.81.0 |
 
-## Estructura del proyecto
+React permite construir interfaces mediante componentes
+reutilizables.
 
-El código está organizado con Atomic Design:
+React Bootstrap facilita el diseño adaptable a diferentes
+tamaños de pantalla.
 
-- `components/atoms`: elementos básicos reutilizables, como `Boton`, `CampoTexto`, `Precio` y etiquetas.
-- `components/molecules`: componentes que combinan átomos, como `CampoFormulario` y `TarjetaServicio`.
-- `components/organisms`: secciones completas, como navegación, pie de página y formularios.
-- `components/templates`: estructuras de página reutilizables.
-- `pages`: pantallas asociadas a las rutas.
-- `context`: estado compartido de la aplicación.
-- `services`: reglas y operaciones de citas y servicios.
-- `data`: datos iniciales.
-- `utils`: funciones auxiliares.
+Vite permite ejecutar y compilar el proyecto.
 
-## Componentes reutilizables
+Vitest y Testing Library permiten comprobar el
+comportamiento de los componentes y sus funcionalidades.
 
-La aplicación utiliza un único componente `Boton` basado en React Bootstrap. Se puede configurar mediante propiedades como `texto`, `children`, `variant`, `tipo`, `className`, `onClick`, `as` y `to`. Así se mantiene una apariencia consistente sin duplicar componentes de botón.
+## 4. Arquitectura del frontend
+
+El proyecto utiliza Atomic Design y separacion
+de responsabilidades.
+
+| Carpeta | Responsabilidad |
+|---|---|
+| components/atoms | Componentes pequeños reutilizables |
+| components/molecules | Combinacion de componentes |
+| components/organisms | Formularios y secciones completas |
+| components/templates | Estructura y proteccion de pantallas |
+| pages | Pantallas de la aplicacion |
+| context | Contextos y proveedores de estado |
+| hooks | Logica reutilizable |
+| services | Comunicacion con la API REST |
+| utils | Funciones auxiliares |
+| data | Datos auxiliares |
+| assets | Imagenes y recursos visuales |
+
+La logica de administracion de servicios se encuentra
+separada de su formulario y tabla.
+
+Los contextos y proveedores se mantienen en archivos
+independientes.
+
+Los hooks personalizados utilizan el prefijo use,
+respetando las reglas de React y manteniendo sus
+nombres descriptivos en español.
+
+El catalogo ya no utiliza localStorage como fuente
+de persistencia.
+
+Los datos de servicios y reservas se obtienen desde
+el backend conectado a PostgreSQL.
+
+## 5. Funcionalidades implementadas
+
+- Registro de pacientes.
+- Inicio y cierre de sesion.
+- Catalogo de servicios.
+- Detalle de servicios nutricionales.
+- Seleccion de nutricionista.
+- Agendamiento de citas.
+- Confirmacion de reservas.
+- Historial de reservas propias.
+- Administracion de servicios.
+- Rutas protegidas por autenticacion y rol.
+- Manejo de errores de conexion.
+- Manejo de sesiones vencidas.
+- Estados de carga y resultados vacios.
+
+## 6. Integracion con la API REST
+
+El archivo src/services/api.js centraliza las
+solicitudes HTTP.
+
+| Funcionalidad | Metodo | Endpoint |
+|---|---|---|
+| Registro | POST | /api/auth/register |
+| Login | POST | /api/auth/login |
+| Catalogo y detalle | GET | /api/servicios |
+| Nutricionistas | GET | /api/nutricionistas |
+| Confirmar cita | POST | /api/reservas |
+| Historial | GET | /api/reservas |
+| Crear servicio | POST | /api/servicios |
+| Editar servicio | PUT | /api/servicios/{codigo} |
+| Eliminar servicio | DELETE | /api/servicios/{codigo} |
+
+El backend tambien implementa GET /api/auth/me
+y GET /api/servicios/{codigo}.
+
+La sesion inicial se obtiene desde la respuesta
+del login. El detalle de servicios utiliza los
+datos obtenidos desde el contexto del catalogo.
+
+### Flujo de una reserva
+
+1. El paciente inicia sesion.
+2. React recibe el JWT y los datos del usuario.
+3. El paciente selecciona un servicio.
+4. Selecciona fecha, hora y nutricionista.
+5. React envia los datos y el JWT al backend.
+6. El backend verifica la identidad y disponibilidad.
+7. PostgreSQL almacena la reserva.
+8. React muestra el resultado de la operacion.
+
+El precio y la identidad del paciente son determinados
+por el servidor y no por el navegador.
+
+## 7. Seguridad
+
+El JWT se mantiene en memoria mediante el contexto
+de autenticacion.
+
+No se almacena el token en localStorage.
+
+La sesion tiene una vigencia de 30 minutos.
+
+El token se envia mediante Authorization Bearer
+en las solicitudes protegidas.
+
+Las rutas de paciente y administrador se mantienen
+separadas.
+
+El backend realiza las comprobaciones definitivas
+de autenticacion y permisos.
+
+Cerrar sesion elimina el token de React, pero no
+revoca una copia previa del token en el servidor.
+
+El despliegue utiliza un tunel SSH para las pruebas
+del laboratorio. La configuracion HTTPS definitiva
+queda pendiente para produccion.
+
+## 8. Instalacion y ejecucion
+
+Requisitos:
+
+- Node.js y npm.
+- Backend disponible.
+- Conexion autorizada a la API.
+
+Instalar dependencias:
+
+    npm ci
+
+En una instalacion nueva, copiar el archivo
+.env.example a .env.local.
+
+Configurar la variable:
+
+    VITE_API_URL=http://127.0.0.1:3001/api
+
+La direccion anterior corresponde al tunel SSH
+utilizado para conectar con AWS EC2.
+
+El puerto local 3001 se redirige al puerto 3000
+del backend.
+
+Ejecutar el frontend:
+
+    npm run dev -- --port 5173 --strictPort
+
+Abrir en el navegador:
+
+    http://localhost:5173
+
+La direccion del backend y su configuracion se
+encuentran documentadas en el repositorio backend.
+
+## 9. Pruebas automatizadas
+
+Ejecutar las pruebas:
+
+    npm test
+
+Ejecutar las pruebas con cobertura:
+
+    npm run test:coverage
+
+Cobertura verificada el 19/11/2026; 107 pruebas verificadas el 20/11/2026:
+
+| Indicador | Resultado |
+|---|---|
+| Archivos de pruebas | 21 de 21 |
+| Casos aprobados | 107 de 107 |
+| Casos fallidos | 0 |
+| Cobertura de lineas | 75.38% |
+| Cobertura de sentencias | 74.81% |
+| Cobertura de funciones | 68.84% |
+| Cobertura de ramificaciones | 67.72% |
+
+Se realizaron pruebas de registro, login, rutas
+protegidas, vencimiento de sesion, agendamiento,
+confirmacion, historial, administracion, catalogo
+y cliente HTTP.
+
+Las pruebas del frontend utilizan respuestas simuladas
+para comprobar el comportamiento de la interfaz.
+
+Las pruebas de integracion con PostgreSQL se ejecutan
+desde el repositorio backend.
+
+## 10. Calidad y compilacion
+
+Revisar el codigo:
+
+    npm run lint
+
+Resultados de Oxlint:
+
+- Errores: 0.
+- Advertencias: 0.
+
+Generar la version de produccion:
+
+    npm run build
+
+Resultado: compilacion aprobada.
+
+Auditar dependencias de produccion:
+
+    npm audit --omit=dev
+
+Resultado de la ultima auditoria:
+0 vulnerabilidades detectadas.
+
+Este resultado no garantiza la ausencia de todos
+los riesgos de seguridad.
+
+## 11. Estado del proyecto
+
+La integracion principal con el backend se encuentra
+implementada.
+
+El frontend cuenta con 107 casos de pruebas aprobados.
+El backend cuenta con 71 casos aprobados y 11
+endpoints documentados mediante OpenAPI.
+
+Pendientes de entrega:
+
+- Incorporar integrantes y seccion.
+- Completar responsabilidades individuales.
+- Incorporar diagramas y enlaces de Google Drive.
+- Completar evidencias manuales pendientes.
+- Revisar y sincronizar ambos repositorios.
+
+Las mejoras de infraestructura, HTTPS y disponibilidad
+se encuentran detalladas en la planificacion del backend.
+
+## 12. Documentacion
+
+- Diagrama entidad-relacion: [archivo editable](https://github.com/dasrojas-cpu/nutrivida-backend/blob/main/docs/guia19/diagramas/01_Modelo_ER.drawio).
+- Diagrama de arquitectura: [archivo editable](https://github.com/dasrojas-cpu/nutrivida-backend/blob/main/docs/guia19/diagramas/02_Arquitectura.drawio).
+- Diagrama de secuencia JWT: [archivo editable](https://github.com/dasrojas-cpu/nutrivida-backend/blob/main/docs/guia19/diagramas/03_Secuencia_JWT.drawio).
+
+Swagger mediante el tunel SSH:
+
+http://127.0.0.1:3001/documentacion/
+
+La documentacion tecnica de seguridad, base de datos
+y API REST se encuentra en el README del backend.

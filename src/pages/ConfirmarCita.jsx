@@ -1,34 +1,72 @@
-
-import { Container, Card, Button } from 'react-bootstrap'
+﻿import { useRef, useState } from 'react'
+import { Container, Card, Button, Spinner } from 'react-bootstrap'
 import { useLocation, useNavigate } from 'react-router-dom'
+
 import PlantillaPublica from '../components/templates/PlantillaPublica'
-import { guardarCita } from '../services/citasService'
+import { useAutenticacion } from '../hooks/useAutenticacion'
+import { crearReserva } from '../services/reservasService'
 
 function ConfirmarCita() {
-  const location = useLocation()
-  const navigate = useNavigate()
+  const ubicacion = useLocation()
+  const navegar = useNavigate()
 
-  const datos = location.state
+  const { token, cerrarSesion } = useAutenticacion()
 
-  function confirmarReserva() {
+  const [guardando, setGuardando] = useState(false)
+  const solicitudEnCurso = useRef(false)
+
+  const datos = ubicacion.state
+
+  async function confirmarReserva() {
+    if (solicitudEnCurso.current) return
+
+    if (!token) {
+      navegar('/login', { replace: true })
+      return
+    }
+
+    solicitudEnCurso.current = true
+    setGuardando(true)
+
     try {
-      const citaGuardada = guardarCita(datos)
+      const reserva = await crearReserva(datos, token)
 
-      navigate('/cita-exitosa', {
+      navegar('/cita-exitosa', {
         replace: true,
-        state: { cita: citaGuardada }
+        state: { cita: reserva }
       })
+
     } catch (error) {
-      navigate('/cita-error', {
+      if (error.estado === 401) {
+        cerrarSesion()
+
+        navegar('/login', {
+          replace: true
+        })
+
+        return
+      }
+
+      navegar('/cita-error', {
         replace: true,
         state: {
-          mensaje: error.message
+          mensaje: error.message,
+          estado: error.estado
         }
       })
+
+    } finally {
+      solicitudEnCurso.current = false
+      setGuardando(false)
     }
   }
 
-  if (!datos) {
+  if (
+    !datos?.codigoServicio ||
+    !datos?.nutricionistaId ||
+    !datos?.fecha ||
+    !datos?.hora
+  ) {
     return (
       <PlantillaPublica>
         <Container className="py-5 text-center">
@@ -36,7 +74,7 @@ function ConfirmarCita() {
 
           <Button
             variant="success"
-            onClick={() => navigate('/nueva-cita')}
+            onClick={() => navegar('/nueva-cita')}
           >
             Volver a agendar
           </Button>
@@ -59,36 +97,39 @@ function ConfirmarCita() {
           <Card.Body>
             <Card.Title>Resumen de la cita</Card.Title>
 
-            <p>
-              <strong>Servicio:</strong> {datos.servicio}
-            </p>
+            <p>Servicio: {datos.servicio}</p>
+            <p>Nutricionista: {datos.nutricionista}</p>
+            <p>Fecha: {datos.fecha}</p>
+            <p>Hora: {datos.hora}</p>
 
-            <p>
-              <strong>Nutricionista:</strong> {datos.nutricionista}
-            </p>
+            <div className="d-flex gap-2 flex-wrap">
+              <Button
+                variant="success"
+                onClick={confirmarReserva}
+                disabled={guardando}
+              >
+                {guardando ? (
+                  <>
+                    <Spinner
+                      animation="border"
+                      size="sm"
+                      className="me-2"
+                    />
+                    Guardando reserva...
+                  </>
+                ) : (
+                  'Confirmar cita'
+                )}
+              </Button>
 
-            <p>
-              <strong>Fecha:</strong> {datos.fecha}
-            </p>
-
-            <p>
-              <strong>Hora:</strong> {datos.hora}
-            </p>
-
-            <Button
-              variant="success"
-              className="me-2"
-              onClick={confirmarReserva}
-            >
-              Confirmar cita
-            </Button>
-
-            <Button
-              variant="secondary"
-              onClick={() => navigate('/nueva-cita')}
-            >
-              Volver
-            </Button>
+              <Button
+                variant="secondary"
+                disabled={guardando}
+                onClick={() => navegar('/nueva-cita')}
+              >
+                Volver
+              </Button>
+            </div>
           </Card.Body>
         </Card>
       </Container>
@@ -97,3 +138,5 @@ function ConfirmarCita() {
 }
 
 export default ConfirmarCita
+
+
