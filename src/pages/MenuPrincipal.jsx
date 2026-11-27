@@ -1,4 +1,5 @@
-﻿import {
+﻿
+import {
   Container,
   Row,
   Col,
@@ -96,16 +97,29 @@ function MenuPrincipal() {
         )}
 
         {esAdministrador && (
-          <Col md={6} lg={4}>
-            <TarjetaMenu
-              icono="⚙️"
-              titulo="Administrar servicios"
-              descripcion="Agrega, edita o elimina servicios nutricionales."
-              textoBoton="Administrar"
-              ruta="/admin-servicios"
-              variante="dark"
-            />
-          </Col>
+          <>
+            <Col md={6} lg={4}>
+              <TarjetaMenu
+                icono="⚙️"
+                titulo="Administrar servicios"
+                descripcion="Agrega, edita o elimina servicios nutricionales."
+                textoBoton="Administrar"
+                ruta="/admin-servicios"
+                variante="dark"
+              />
+            </Col>
+
+            <Col md={6} lg={4}>
+              <TarjetaMenu
+                icono="👥"
+                titulo="Administrar usuarios"
+                descripcion="Registra, consulta, edita y elimina usuarios."
+                textoBoton="Gestionar usuarios"
+                ruta="/admin-usuarios"
+                variante="dark"
+              />
+            </Col>
+          </>
         )}
 
       </Row>
@@ -124,5 +138,3 @@ function MenuPrincipal() {
 }
 
 export default MenuPrincipal
-
-

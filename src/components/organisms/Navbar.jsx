@@ -76,9 +76,15 @@ function Navbar() {
             )}
 
             {esAdministrador && (
-              <Nav.Link as={Link} to="/admin-servicios">
-                Administrar servicios
-              </Nav.Link>
+              <>
+                <Nav.Link as={Link} to="/admin-servicios">
+                  Administrar servicios
+                </Nav.Link>
+
+                <Nav.Link as={Link} to="/admin-usuarios">
+                  Administrar usuarios
+                </Nav.Link>
+              </>
             )}
 
             {autenticado ? (
@@ -104,5 +110,6 @@ function Navbar() {
 }
 
 export default Navbar
+
 
 
