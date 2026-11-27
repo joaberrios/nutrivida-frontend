@@ -1,4 +1,5 @@
-﻿import { useCallback, useEffect, useState } from 'react'
+﻿
+import { useCallback, useEffect, useState } from 'react'
 import { useAutenticacion } from './useAutenticacion'
 
 import {
@@ -36,17 +37,22 @@ export function useAdministracionUsuarios() {
 
     try {
       const respuesta = await listarUsuarios(token)
+
       const lista = Array.isArray(respuesta)
         ? respuesta
         : respuesta?.usuarios
 
       if (!Array.isArray(lista)) {
-        throw new Error('El servidor no devolvió una lista de usuarios.')
+        throw new Error(
+          'El servidor no devolvió una lista de usuarios.'
+        )
       }
 
       setUsuarios(lista)
+
     } catch (errorSolicitud) {
       setError(errorSolicitud.message)
+
     } finally {
       setCargando(false)
     }
@@ -59,7 +65,7 @@ export function useAdministracionUsuarios() {
   function cambiarCampo(evento) {
     const { name, value } = evento.target
 
-    setFormulario((anterior) => ({
+    setFormulario(anterior => ({
       ...anterior,
       [name]: value
     }))
@@ -111,9 +117,21 @@ export function useAdministracionUsuarios() {
       return
     }
 
+    if (
+      !['paciente', 'administrador'].includes(datos.rol)
+    ) {
+      setError('Selecciona un rol válido.')
+      return
+    }
+
     if (idEditando === null) {
-      if (formulario.contrasena.length < 15) {
-        setError('La contraseña debe tener al menos 15 caracteres.')
+      if (
+        formulario.contrasena.length < 15 ||
+        formulario.contrasena.length > 128
+      ) {
+        setError(
+          'La contraseña debe tener entre 15 y 128 caracteres.'
+        )
         return
       }
 
@@ -124,10 +142,17 @@ export function useAdministracionUsuarios() {
 
     try {
       if (idEditando !== null) {
-        await actualizarUsuario(idEditando, datos, token)
+        await actualizarUsuario(
+          idEditando,
+          datos,
+          token
+        )
+
         setMensaje('Usuario actualizado correctamente.')
+
       } else {
         await crearUsuario(datos, token)
+
         setMensaje('Usuario creado correctamente.')
       }
 
@@ -136,8 +161,10 @@ export function useAdministracionUsuarios() {
       setDetalle(null)
 
       await cargarUsuarios()
+
     } catch (errorSolicitud) {
       setError(errorSolicitud.message)
+
     } finally {
       setProcesando(false)
     }
@@ -149,7 +176,9 @@ export function useAdministracionUsuarios() {
 
     try {
       const respuesta = await consultarUsuario(id, token)
+
       setDetalle(respuesta?.usuario ?? respuesta)
+
     } catch (errorSolicitud) {
       setError(errorSolicitud.message)
     }
@@ -178,8 +207,10 @@ export function useAdministracionUsuarios() {
       setMensaje('Usuario desactivado correctamente.')
 
       await cargarUsuarios()
+
     } catch (errorSolicitud) {
       setError(errorSolicitud.message)
+
     } finally {
       setProcesando(false)
     }
