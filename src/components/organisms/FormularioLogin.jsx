@@ -1,79 +1,118 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Form from 'react-bootstrap/Form'
- 
+
 import CampoFormulario from '../molecules/CampoFormulario'
 import BotonLogin from '../atoms/BotonLogin'
- 
+import { iniciarSesion } from '../../services/autenticacionService'
+
 function FormularioLogin() {
   const [correo, setCorreo] = useState('')
   const [contrasena, setContrasena] = useState('')
   const [mensaje, setMensaje] = useState('')
- 
+  const [cargando, setCargando] = useState(false)
+
   const navigate = useNavigate()
- 
-  function iniciarSesion(event) {
+
+  async function procesarInicioSesion(event) {
     event.preventDefault()
- 
+
+    if (cargando) return
+
+    setMensaje('')
+
     const correoLimpio = correo.trim().toLowerCase()
-    const contrasenaLimpia = contrasena.trim()
- 
-    if (correoLimpio === '' || contrasenaLimpia === '') {
+
+    if (!correoLimpio || !contrasena.trim()) {
       setMensaje('Debe completar todos los campos')
       return
     }
- 
+
     const dominiosPermitidos = [
       '@gmail.com',
       '@duocuc.cl',
-      '@profesorduoc.cl'
+      '@profesorduoc.cl',
+      '@hotmail.com'
     ]
- 
-    const correoValido =
-      dominiosPermitidos.some((dominio) =>
-        correoLimpio.endsWith(dominio)
-      )
- 
+
+    const correoValido = dominiosPermitidos.some(
+      dominio => correoLimpio.endsWith(dominio)
+    )
+
     if (!correoValido) {
       setMensaje('Correo no permitido')
       return
     }
- 
-    setMensaje('Inicio de sesión correcto')
-    navigate('/menu')
+
+    setCargando(true)
+
+    try {
+      const resultado = await iniciarSesion({
+        correo: correoLimpio,
+        contrasena
+      })
+
+      if (!resultado.accessToken || !resultado.usuario) {
+        setMensaje('Respuesta del servidor invalida')
+        return
+      }
+
+      sessionStorage.setItem(
+        'nutrivida_token',
+        resultado.accessToken
+      )
+
+      sessionStorage.setItem(
+        'nutrivida_usuario',
+        JSON.stringify(resultado.usuario)
+      )
+
+      navigate('/inicio')
+
+    } catch (error) {
+      setMensaje(
+        error.response?.data?.mensaje ||
+        'No se pudo conectar con el servidor'
+      )
+
+    } finally {
+      setCargando(false)
+    }
   }
- 
+
   return (
-    <Form onSubmit={iniciarSesion}>
+    <Form onSubmit={procesarInicioSesion}>
       <h2 className="text-center mb-4">
         Iniciar sesión
       </h2>
- 
+
       <CampoFormulario
         etiqueta="Correo electrónico"
         tipo="email"
         placeholder="Ingrese su correo"
         valor={correo}
-        alCambiar={(event) => setCorreo(event.target.value)}
+        alCambiar={event => setCorreo(event.target.value)}
       />
- 
+
       <CampoFormulario
         etiqueta="Contraseña"
         tipo="password"
         placeholder="Ingrese su contraseña"
         valor={contrasena}
-        alCambiar={(event) => setContrasena(event.target.value)}
+        alCambiar={event => setContrasena(event.target.value)}
       />
- 
-      <BotonLogin texto="Iniciar sesión" />
- 
+
+      <BotonLogin
+        texto={cargando ? 'Ingresando...' : 'Iniciar sesión'}
+      />
+
       {mensaje && (
-        <p className="text-center mt-3">
+        <p className="text-center text-danger mt-3" role="alert">
           {mensaje}
         </p>
       )}
     </Form>
   )
 }
- 
+
 export default FormularioLogin

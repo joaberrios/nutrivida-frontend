@@ -1,59 +1,39 @@
-import serviciosIniciales from '../data/servicios'
+﻿import instanciaApi from './api'
+import { crearServicioRequestDto } from '../dto/servicio.dto'
 
-const CLAVE = 'servicios'
-
-// Carga los datos iniciales si todavía no existen
-function iniciarDatos() {
-  const datos = localStorage.getItem(CLAVE)
-
-  if (!datos) {
-    localStorage.setItem(CLAVE, JSON.stringify(serviciosIniciales))
-  }
+// Consultar todos los servicios de PostgreSQL
+export async function listarServicios() {
+  const respuesta = await instanciaApi.get('/api/servicios')
+  return respuesta.data
 }
 
-// LISTAR
-export function listarServicios() {
-  iniciarDatos()
+// Crear un servicio
+export async function crearServicio(datos) {
+  const solicitud = crearServicioRequestDto(datos)
 
-  const datos = localStorage.getItem(CLAVE)
-  return JSON.parse(datos)
-}
-
-// CREAR
-export function crearServicio(nuevoServicio) {
-  const servicios = listarServicios()
-
-  servicios.push(nuevoServicio)
-
-  localStorage.setItem(CLAVE, JSON.stringify(servicios))
-
-  return nuevoServicio
-}
-
-// ACTUALIZAR
-export function actualizarServicio(codigo, servicioActualizado) {
-  const servicios = listarServicios()
-
-  const nuevosServicios = servicios.map((servicio) =>
-    servicio.codigo === codigo
-      ? { ...servicio, ...servicioActualizado }
-      : servicio
+  const respuesta = await instanciaApi.post(
+    '/api/servicios',
+    solicitud
   )
 
-  localStorage.setItem(CLAVE, JSON.stringify(nuevosServicios))
-
-  return nuevosServicios
+  return respuesta.data.servicio
 }
 
-// ELIMINAR
-export function eliminarServicio(codigo) {
-  const servicios = listarServicios()
+// Actualizar un servicio
+export async function actualizarServicio(codigo, datos) {
+  const solicitud = crearServicioRequestDto(datos)
 
-  const nuevosServicios = servicios.filter(
-    (servicio) => servicio.codigo !== codigo
+  const respuesta = await instanciaApi.put(
+    `/api/servicios/${encodeURIComponent(codigo)}`,
+    solicitud
   )
 
-  localStorage.setItem(CLAVE, JSON.stringify(nuevosServicios))
+  return respuesta.data.servicio
+}
 
-  return nuevosServicios
+// Desactivar un servicio
+export async function eliminarServicio(codigo) {
+  await instanciaApi.delete(
+    `/api/servicios/${encodeURIComponent(codigo)}`
+  )
 }
