@@ -14,6 +14,7 @@ import ConfirmarCita from './pages/ConfirmarCita'
 import CitaExitosa from './pages/CitaExitosa'
 import CitaError from './pages/CitaError'
 import AdminServicios from './pages/AdminServicios'
+import AdminUsuarios from './pages/AdminUsuarios'
 import MisCitas from './pages/MisCitas'
 
 function App() {
@@ -92,6 +93,10 @@ function App() {
         />
       </Route>
 
+      <Route element={<RutaProtegida roles={['administrador']} />}>
+        <Route path="/admin-usuarios" element={<AdminUsuarios />} />
+      </Route>
+
       <Route
         path="*"
         element={<Navigate to="/login" replace />}
@@ -101,4 +106,5 @@ function App() {
 }
 
 export default App
+
 
